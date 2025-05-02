@@ -27,7 +27,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/api/auth/**",
-                                "/api/users",
+                                "/api/users/**",
                                 "/error", "/favicon.ico",
                                 "/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.svg"
                         ).permitAll()
