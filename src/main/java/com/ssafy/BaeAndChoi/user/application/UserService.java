@@ -15,10 +15,10 @@ public class UserService {
     private final UserRepository userRepository;
 
     public String createUser(UserInputDTO input){
-
-        if(userRepository.findByUserId((input.getUserId())) != null){
+        if(userRepository.findByUserId(input.getUserId()).isPresent()){
             throw new BadRequestException("User already exists");
         }
+
 
         User user = User.builder()
                 .userId(input.getUserId())
@@ -34,7 +34,27 @@ public class UserService {
     }
 
     public User getUser(String userId){
-        return userRepository.findByUserId(userId);
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequestException("User does not exist"));
+        return user;
+    }
+
+    @Transactional
+    public String deleteUserBy(String userId) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequestException("User does not exist"));
+
+        userRepository.deleteByUserId(userId);
+        return "success delete user";
+    }
+
+    @Transactional
+    public String updateUser(UserInputDTO input){
+        User user = userRepository.findByUserId(input.getUserId())
+                .orElseThrow(() -> new BadRequestException("User does not exist"));
+
+        user.update(input);
+        return "success update user";
     }
 
     @Transactional
