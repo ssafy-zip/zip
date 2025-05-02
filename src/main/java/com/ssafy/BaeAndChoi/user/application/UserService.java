@@ -56,4 +56,15 @@ public class UserService {
         user.update(input);
         return "success update user";
     }
+
+    @Transactional
+    public String deleteUserBy(String userId) {
+        if(userRepository.findByUserId(userId) == null){
+            throw new BadRequestException("User not found");
+        }
+
+        userRepository.deleteByUserId(userId);
+        return "success delete user";
+    }
+
 }
