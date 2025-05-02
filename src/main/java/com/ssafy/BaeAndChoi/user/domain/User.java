@@ -1,33 +1,47 @@
 package com.ssafy.BaeAndChoi.user.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.ssafy.BaeAndChoi.user.enums.Role;
+import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "User")
-@Getter
-@Setter
+@NoArgsConstructor
+@Getter @Setter
 public class User {
 
     @Id
-    private String key;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column(name = "user_id", length = 63)
+    private String userId;
 
     @Column(length = 63)
-    private String field;
+    private String password;
 
     @Column(length = 63)
-    private String field2;
+    private String name;
 
     @Column(length = 11)
-    private String field3;
+    private String phone;
 
     @Column(length = 63)
-    private String field4;
+    private String email;
 
     @Column(length = 10)
-    private String field5;
+    private Role role;
+
+    @Builder
+    public User(String userId, String password, String name, String phone, String email, Role role) {
+        this.userId = userId;
+        this.password = password;
+        this.name = name;
+        this.phone = phone;
+        this.email = email;
+        this.role = role;
+    }
 }
