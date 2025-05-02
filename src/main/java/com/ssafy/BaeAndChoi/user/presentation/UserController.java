@@ -17,7 +17,6 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<String> addUser(@RequestBody UserInputDTO request) {
-        System.out.println("addUser");
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(request));
     }
 
@@ -29,5 +28,10 @@ public class UserController {
     @GetMapping("deleteUserId")
     public ResponseEntity<String> deleteUser(@RequestParam String userId) {
         return ResponseEntity.ok(userService.deleteUserBy(userId));
+    }
+
+    @PostMapping("updateUser")
+    public ResponseEntity<String> updateUser(@RequestBody UserInputDTO request) {
+        return ResponseEntity.ok(userService.updateUser(request));
     }
 }

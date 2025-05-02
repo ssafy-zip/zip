@@ -1,5 +1,6 @@
 package com.ssafy.BaeAndChoi.user.domain;
 
+import com.ssafy.BaeAndChoi.user.dto.UserInputDTO;
 import com.ssafy.BaeAndChoi.user.enums.Role;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -26,7 +27,7 @@ public class User {
     @Column(length = 63)
     private String name;
 
-    @Column(length = 11)
+    @Column(length = 13)
     private String phone;
 
     @Column(length = 63)
@@ -44,4 +45,13 @@ public class User {
         this.email = email;
         this.role = role;
     }
+
+    public void update(UserInputDTO dto) {
+        this.password = dto.getPassword();
+        this.name = dto.getName();
+        this.phone = dto.getPhone();
+        this.email = dto.getEmail();
+        this.role = dto.getRole();
+    }
+
 }
