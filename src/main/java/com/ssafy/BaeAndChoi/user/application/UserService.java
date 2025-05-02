@@ -4,6 +4,7 @@ import com.ssafy.BaeAndChoi.exception.BadRequestException;
 import com.ssafy.BaeAndChoi.user.domain.User;
 import com.ssafy.BaeAndChoi.user.dto.UserInputDTO;
 import com.ssafy.BaeAndChoi.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -35,4 +36,15 @@ public class UserService {
     public User getUser(String userId){
         return userRepository.findByUserId(userId);
     }
+
+    @Transactional
+    public String deleteUserBy(String userId) {
+        if(userRepository.findByUserId(userId) == null){
+            throw new BadRequestException("User not found");
+        }
+
+        userRepository.deleteByUserId(userId);
+        return "success delete user";
+    }
+
 }
