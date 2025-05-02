@@ -4,10 +4,8 @@ import com.ssafy.BaeAndChoi.user.application.UserService;
 import com.ssafy.BaeAndChoi.user.domain.User;
 import com.ssafy.BaeAndChoi.user.dto.UserInputDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,8 +21,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(request));
     }
 
-    @GetMapping("findId/{id}")
-    public ResponseEntity<User> findById(@RequestParam String request) {
-        return ResponseEntity.ok(userService.getUser(request));
+    @GetMapping("getUserById")
+    public ResponseEntity<User> findById(@RequestParam String userId) {
+        return ResponseEntity.ok(userService.getUser(userId));
+    }
+
+    @GetMapping("deleteUserId")
+    public ResponseEntity<String> deleteUser(@RequestParam String userId) {
+        return ResponseEntity.ok(userService.deleteUserBy(userId));
     }
 }
