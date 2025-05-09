@@ -18,7 +18,7 @@ spring:
         show_sql: true
         format_sql: true
         hbm2ddl:
-          auto: update
+          auto: create
 app:
   cors:
     allowedOrigins:
@@ -44,3 +44,6 @@ server:
   port: 8080
   tomcat:
     uri-encoding: UTF-8
+API:
+#  key: eq3Do1yF57fqENuUSWwSlibvbOtmwRIgJLStRfGz%2BK1CqY6rKvCGH7vfXUZmXgmv0XWVGa7kGz7W0Cnz5EKA4w%3D%3D
+  key: SECRET_EXTERNAL_API_KEY
