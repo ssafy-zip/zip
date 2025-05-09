@@ -40,15 +40,6 @@ public class UserService {
     }
 
     @Transactional
-    public String deleteUserBy(String userId) {
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new BadRequestException("User does not exist"));
-
-        userRepository.deleteByUserId(userId);
-        return "success delete user";
-    }
-
-    @Transactional
     public String updateUser(UserInputDTO input){
         User user = userRepository.findByUserId(input.getUserId())
                 .orElseThrow(() -> new BadRequestException("User does not exist"));
