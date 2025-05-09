@@ -24,12 +24,12 @@ public class BoardServiceImpl implements BoardService {
     @Override
     @Transactional
     public BoardResponseDTO createBoard(BoardRequestDTO dto) {
-        User user = userRepository.findById(dto.getUserId())
+        User writer = userRepository.findById(dto.getWriterId())
                 .orElseThrow(() -> new RuntimeException("사용자 정보 없음"));
         Board board = Board.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
-                .user(user)
+                .writer(writer)
                 .views(0)
                 .likes(0)
                 .build();
@@ -78,8 +78,8 @@ public class BoardServiceImpl implements BoardService {
                 .id(board.getId())
                 .title(board.getTitle())
                 .content(board.getContent())
-                .writerName(board.getUser().getName())
-                .writerId(board.getUser().getId())
+                .writerName(board.getWriter().getName())
+                .writerId(board.getWriter().getId())
                 .createdAt(board.getCreatedAt())
                 .updatedAt(board.getUpdatedAt())
                 .views(board.getViews())
