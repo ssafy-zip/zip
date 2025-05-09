@@ -29,6 +29,7 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/api/users/**",
                                 "/api/boards/**",
+                                "/api/apartments/**",
                                 "/error", "/favicon.ico",
                                 "/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.svg"
                         ).permitAll()
