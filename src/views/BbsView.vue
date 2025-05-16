@@ -13,7 +13,7 @@
             v-for="tab in tabs"
             :key="tab"
             :class="['bbs-tab', { active: currentTab === tab }]"
-            @click="currentTab = tab"
+            @click="selectTab(tab)"
           >
             {{ tab }}
           </button>
@@ -21,14 +21,14 @@
 
         <!-- 정렬 + 글쓰기 -->
         <div class="bbs-misc">
-          <select class="bbs-sort-select" v-model="sort">
+          <select class="bbs-sort-select" v-model="sort" @change="fetchPosts">
             <option value="latest">최신순</option>
             <option value="oldest">오래된순</option>
             <option value="views">조회순</option>
             <option value="likes">추천순</option>
             <option value="comments">댓글순</option>
           </select>
-          <router-link to="/bbs/write" class="bbs-write-button">글쓰기</router-link>
+          <button class="bbs-write-button" @click="handleWrite">글쓰기</button>
         </div>
       </div>
     </div>
@@ -50,6 +50,7 @@
           <tr v-for="post in posts" :key="post.id">
             <td>{{ post.id }}</td>
             <td class="bbs-record-title">
+              <!-- 상세 페이지로 이동하도록 경로 수정 -->
               <router-link :to="`/bbs/${post.id}`">{{ post.title }}</router-link>
             </td>
             <td>{{ post.writer }}</td>
@@ -70,59 +71,124 @@
         <option value="writer">작성자</option>
       </select>
       <input type="text" class="bbs-search-input" v-model="searchQuery" placeholder="검색어 입력" />
-      <button class="bbs-search-button" @click="searchPosts"><i class="fa fa-search"></i></button>
+      <button class="bbs-search-button" @click="searchPosts">
+        <i class="fa fa-search"></i>
+      </button>
     </div>
 
     <!-- 페이지네이션 -->
     <div class="bbs-pagination">
-      <button class="page-button" @click="prevPage">&laquo;</button>
+      <button class="page-button" @click="prevPage">«</button>
       <button
         v-for="page in totalPages"
         :key="page"
         :class="['page-button', { active: currentPage === page }]"
-        @click="currentPage = page"
+        @click="changePage(page)"
       >
-        {{ page }}
+        {{ page + 1 }}
       </button>
-      <button class="page-button" @click="nextPage">&raquo;</button>
+      <button class="page-button" @click="nextPage">»</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, getCurrentInstance, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
 
+// 전역 auth 플러그인 사용
+const { proxy } = getCurrentInstance()
+const router = useRouter()
+
+// 탭(한글)과 백엔드 PostType 매핑
 const tabs = ['전체', '공지', '정보', '질문', '홍보', '잡담']
+const typeMap = {
+  공지: 'NOTICE',
+  정보: 'INFO',
+  질문: 'QUESTION',
+  홍보: 'PROMOTION',
+  잡담: 'CHAT',
+}
+
 const currentTab = ref('전체')
 const sort = ref('latest')
+const currentPage = ref(0) // Spring Page는 0 기반
+const pageSize = ref(10)
+const totalPages = ref(1)
 
 const searchOption = ref('all')
 const searchQuery = ref('')
-const currentPage = ref(1)
 
-const posts = ref([
-  {
-    id: 1,
-    title: 'Zip 오픈을 축하합니다',
-    writer: '관리자',
-    date: '2024-05-10',
-    views: 123,
-    likes: 11,
-  },
-  // ... 더미 데이터 또는 API 연동
-])
+const posts = ref([])
 
-const totalPages = 5
+// API 호출: 카테고리·정렬·페이징 파라미터 전달
+async function fetchPosts() {
+  try {
+    const params = {
+      sort: sort.value,
+      page: currentPage.value,
+      size: pageSize.value,
+    }
+    if (currentTab.value !== '전체') {
+      params.category = typeMap[currentTab.value]
+    }
+    if (searchOption.value !== 'all' && searchQuery.value.trim()) {
+      params.searchBy = searchOption.value
+      params.query = searchQuery.value.trim()
+    }
 
-const prevPage = () => {
-  if (currentPage.value > 1) currentPage.value--
+    const resp = await axios.get('/api/boards', { params })
+    posts.value = resp.data.content.map((b) => ({
+      id: b.id,
+      title: b.title,
+      writer: b.writerName,
+      date: new Date(b.createdAt).toLocaleString(),
+      views: b.views,
+      likes: b.likes,
+    }))
+    totalPages.value = resp.data.totalPages
+  } catch (err) {
+    console.error('게시판 목록 로드 오류', err)
+  }
 }
-const nextPage = () => {
-  if (currentPage.value < totalPages) currentPage.value++
+
+function selectTab(tab) {
+  currentTab.value = tab
+  currentPage.value = 0
+  fetchPosts()
 }
-const searchPosts = () => {
-  alert(`"${searchOption.value}"에서 "${searchQuery.value}" 검색`)
+
+function changePage(page) {
+  currentPage.value = page
+  fetchPosts()
 }
+
+function prevPage() {
+  if (currentPage.value > 0) changePage(currentPage.value - 1)
+}
+
+function nextPage() {
+  if (currentPage.value < totalPages.value - 1) changePage(currentPage.value + 1)
+}
+
+function searchPosts() {
+  currentPage.value = 0
+  fetchPosts()
+}
+
+// 글쓰기 클릭 시 로그인 체크 및 라우팅
+function handleWrite() {
+  const token = proxy.$auth?.token || localStorage.getItem('authToken')
+  if (!token) {
+    alert('로그인 후 이용 가능합니다.')
+    router.push({ name: 'Login' })
+    return
+  }
+  router.push({ name: 'BbsWrite' })
+}
+
+onMounted(fetchPosts)
 </script>
 
 <style scoped>
@@ -134,8 +200,6 @@ const searchPosts = () => {
   margin: 60px auto;
   padding: 0 20px;
 }
-
-/* 헤더 */
 .bbs-header {
   display: flex;
   flex-direction: column;
@@ -154,8 +218,6 @@ const searchPosts = () => {
   display: flex;
   justify-content: space-between;
 }
-
-/* 탭 */
 .bbs-tabs {
   display: flex;
 }
@@ -165,7 +227,7 @@ const searchPosts = () => {
   background: white;
   cursor: pointer;
   color: #374151;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
 }
 .bbs-tab:first-child {
   border-top-left-radius: 8px;
@@ -184,8 +246,6 @@ const searchPosts = () => {
   border-color: #1d4ed8;
   font-weight: bold;
 }
-
-/* 정렬 + 글쓰기 */
 .bbs-misc {
   display: flex;
   align-items: center;
@@ -197,7 +257,7 @@ const searchPosts = () => {
   font-size: 14px;
   border: 1px solid #cbd5e1;
   border-radius: 4px;
-  background-color: white;
+  background: white;
   color: #374151;
   cursor: pointer;
 }
@@ -205,37 +265,35 @@ const searchPosts = () => {
   padding: 8px 16px;
   background-color: #2563eb;
   color: white;
-  text-decoration: none;
   border-radius: 4px;
   font-size: 14px;
   font-weight: bold;
-  transition: background-color 0.2s ease;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 .bbs-write-button:hover {
   background-color: #1d4ed8;
 }
-
-/* 게시판 테이블 */
 .bbs-table table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
+  background: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 .bbs-table th {
   padding: 10px;
   text-align: center;
-  border-bottom: 2px solid #000000;
-  background-color: #e5e7eb;
+  border-bottom: 2px solid #000;
+  background: #e5e7eb;
   color: #1f2937;
   font-weight: bold;
 }
 .bbs-table td {
   padding: 10px;
   text-align: center;
-  border-bottom: 1px solid #000000;
+  border-bottom: 1px solid #000;
 }
-.bbs-table .bbs-record-title {
+.bbs-record-title {
   text-align: left;
   overflow: hidden;
   white-space: nowrap;
@@ -246,30 +304,20 @@ const searchPosts = () => {
   color: inherit;
   text-decoration: none;
 }
-.bbs-table a:hover {
-  text-decoration: underline;
-}
-
-/* 검색 */
 .bbs-search {
   display: flex;
   justify-content: flex-end;
   margin: 20px 0;
   gap: 8px;
 }
-.bbs-search-option {
+.bbs-search-option,
+.bbs-search-input {
   padding: 8px;
   font-size: 14px;
   border: 1px solid #cbd5e1;
   border-radius: 4px;
-  background-color: white;
-  color: #374151;
 }
 .bbs-search-input {
-  padding: 8px 12px;
-  font-size: 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 4px;
   width: 200px;
 }
 .bbs-search-button {
@@ -279,13 +327,11 @@ const searchPosts = () => {
   padding: 8px 12px;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s;
 }
 .bbs-search-button:hover {
   background-color: #1d4ed8;
 }
-
-/* 페이지네이션 */
 .bbs-pagination {
   display: flex;
   justify-content: center;
@@ -294,18 +340,18 @@ const searchPosts = () => {
 .page-button {
   padding: 6px 10px;
   border: 1px solid #cbd5e1;
-  background-color: white;
+  background: white;
   cursor: pointer;
   color: #374151;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
 }
 .page-button:hover {
-  background-color: #3b82f6;
+  background: #3b82f6;
   color: white;
   border-color: #3b82f6;
 }
 .page-button.active {
-  background-color: #1d4ed8;
+  background: #1d4ed8;
   color: white;
   border-color: #1d4ed8;
   font-weight: bold;
