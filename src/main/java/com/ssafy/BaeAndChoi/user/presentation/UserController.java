@@ -6,7 +6,9 @@ import com.ssafy.BaeAndChoi.user.domain.User;
 import com.ssafy.BaeAndChoi.user.dto.LoginDTO;
 import com.ssafy.BaeAndChoi.user.dto.LoginResponseDTO;
 import com.ssafy.BaeAndChoi.user.dto.UserInputDTO;
+import com.ssafy.BaeAndChoi.user.enums.Role;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -38,13 +41,13 @@ public class UserController {
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         // 2) JWT 생성
+        Role role = userService.getUser(auth.getName()).getRole();
         String token = jwtUtil.generateToken(
-                loginDTO.getUserId(),
-                Map.of("roles", auth.getAuthorities())
+                auth.getName(),
+                Map.of("role", role.name())
         );
 
-        // 4) 응답
-        return ResponseEntity.ok(new LoginResponseDTO(token));
+        return ResponseEntity.ok(new LoginResponseDTO(token, role));
     }
 
     @PostMapping

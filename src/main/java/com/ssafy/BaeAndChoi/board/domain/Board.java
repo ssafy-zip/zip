@@ -32,6 +32,11 @@ public class Board {
     /** 게시글 제목 */
     private String title;
 
+    /** 게시판 타입 */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PostType category;
+
     /** 게시글 내용 (길이 제한 없음) */
     @Column(columnDefinition = "TEXT")
     private String content;
