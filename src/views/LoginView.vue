@@ -2,7 +2,9 @@
   <div class="login-wrapper">
     <!-- 로고 -->
     <div class="form-header">
-      <a href="#"><img src="/image/logo/logo-black-large.png" class="form-logo" /></a>
+      <router-link to="/"
+        ><img src="/image/logo/logo-black-large.png" class="form-logo"
+      /></router-link>
     </div>
 
     <!-- 로그인 폼 -->
@@ -13,10 +15,11 @@
           <i class="fa-solid fa-envelope fa-2x"></i>
         </label>
         <div class="input-wrapper">
-          <input type="text" id="username" v-model="username" placeholder="아이디" />
+          <input type="text" id="username" v-model="username" placeholder="아이디" autofocus />
           <button
             type="button"
             class="clear-button"
+            v-if="username"
             @click="username = ''"
             aria-label="입력 지우기"
           >
@@ -49,6 +52,11 @@
         </div>
       </div>
 
+      <!-- 오류 메시지 -->
+      <p v-if="errorMessage" class="error">
+        {{ errorMessage }}
+      </p>
+
       <!-- 아이디 저장 -->
       <div class="form-remember">
         <label class="remember-label">
@@ -77,32 +85,80 @@
 
       <!-- 링크 -->
       <div class="login-links">
-        <a href="/findId">아이디 찾기</a>
+        <router-link to="/findId">아이디 찾기</router-link>
         <span>|</span>
-        <a href="/findPassword">비밀번호 찾기</a>
+        <router-link to="/findPassword">비밀번호 찾기</router-link>
         <span>|</span>
-        <a href="/join">회원가입</a>
+        <router-link to="/join">회원가입</router-link>
       </div>
     </form>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, getCurrentInstance } from 'vue'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
+
+defineOptions({ name: 'LoginView' })
+
+const router = useRouter()
+const { proxy } = getCurrentInstance()
 
 const username = ref('')
 const password = ref('')
 const rememberId = ref(false)
 const showPassword = ref(false)
+const errorMessage = ref('')
 
 const togglePassword = () => {
   showPassword.value = !showPassword.value
 }
 
-const handleSubmit = () => {
-  // TODO: 로그인 로직 처리
-  alert(`아이디: ${username.value}, 비밀번호: ${password.value}`)
+async function handleSubmit() {
+  errorMessage.value = ''
+
+  if (!username.value || !password.value) {
+    errorMessage.value = '아이디와 비밀번호를 모두 입력해주세요.'
+    return
+  }
+
+  try {
+    const response = await axios.post('/api/users/login', {
+      userId: username.value,
+      password: password.value,
+    })
+    const token = response.data.token
+
+    // 플러그인을 통한 전역 상태에 토큰 저장
+    proxy.$setAuthToken(token)
+
+    // 아이디 저장
+    if (rememberId.value) {
+      localStorage.setItem('savedUserId', username.value)
+    } else {
+      localStorage.removeItem('savedUserId')
+    }
+
+    // 로그인 성공 시 홈으로 이동
+    router.push('/')
+  } catch (err) {
+    console.error(err)
+    if (err.response && err.response.status === 401) {
+      errorMessage.value = '아이디 또는 비밀번호가 올바르지 않습니다.'
+    } else {
+      errorMessage.value = '로그인 중 오류가 발생했습니다.'
+    }
+  }
 }
+
+onMounted(() => {
+  const saved = localStorage.getItem('savedUserId')
+  if (saved) {
+    username.value = saved
+    rememberId.value = true
+  }
+})
 </script>
 
 <style scoped>
@@ -227,12 +283,13 @@ body {
   color: #6b7280;
 }
 
-.login-links a {
+.login-links router-link {
   color: #2563eb;
   text-decoration: none;
+  margin: 0 4px;
 }
 
-.login-links a:hover {
+.login-links router-link:hover {
   text-decoration: underline;
 }
 
@@ -280,5 +337,11 @@ body {
 
 .social-button.naver {
   background-color: #03c75a;
+}
+
+.error {
+  color: #e53e3e;
+  font-size: 0.875rem;
+  margin-bottom: 12px;
 }
 </style>
