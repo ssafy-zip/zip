@@ -1,28 +1,20 @@
 <template>
   <div class="house-map-container">
     <!-- 사이드바 -->
+    <!-- 사이드바 토글 버튼(임시)-->
+    <div class="house-sidebar-toggle" @click="toggleSidebar">
+      {{ sidebarOpen ? '닫기' : '열기' }}
+    </div>
+
     <div :class="['house-sidebar', { open: sidebarOpen }]">
-      <div class="house-sidebar-toggle" @click="toggleSidebar">
-        {{ sidebarOpen ? '닫기' : '열기' }}
-      </div>
-      <div v-if="sidebarOpen" class="house-sidebar-content">
-        <h2>지역 검색</h2>
-        <!-- 예: 시/군/구 필터 -->
-        <ul class="sidebar-menu">
-          <li>서울특별시</li>
-          <li>부산광역시</li>
-          <li>대구광역시</li>
-        </ul>
+      <!-- <div v-if="sidebarOpen" class="house-sidebar-content"> -->
+      <div class="house-sidebar-content">
+        <h2>사이드바 영역</h2>
       </div>
     </div>
 
     <!-- 지도 영역 -->
-    <div class="house-map" ref="mapContainer" @click="closeSidebar">
-      <div class="map-placeholder">
-        실제 지도 라이브러리 삽입 예정 위치
-        <p>지도 영역입니다</p>
-      </div>
-    </div>
+    <div class="house-map" ref="mapContainer"></div>
   </div>
 </template>
 
@@ -34,10 +26,6 @@ const mapContainer = ref(null)
 
 const toggleSidebar = () => {
   sidebarOpen.value = !sidebarOpen.value
-}
-
-const closeSidebar = () => {
-  if (sidebarOpen.value) sidebarOpen.value = false
 }
 
 onMounted(() => {
@@ -83,8 +71,8 @@ onMounted(() => {
 /* 사이드바 열고 닫기 버튼 */
 .house-sidebar-toggle {
   position: absolute;
-  top: 10px;
-  right: -50px;
+  top: 0px;
+  left: 0px;
   width: 50px;
   background-color: #2563eb;
   color: white;
@@ -98,6 +86,7 @@ onMounted(() => {
 
 /* 사이드바 내부 내용 */
 .house-sidebar-content {
+  min-width: 210px;
   padding: 20px;
 }
 .sidebar-menu {
