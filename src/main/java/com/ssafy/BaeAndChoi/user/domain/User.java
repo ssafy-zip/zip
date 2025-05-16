@@ -51,7 +51,6 @@ public class User {
         this.name = dto.getName();
         this.phone = dto.getPhone();
         this.email = dto.getEmail();
-        this.role = dto.getRole();
     }
 
 }

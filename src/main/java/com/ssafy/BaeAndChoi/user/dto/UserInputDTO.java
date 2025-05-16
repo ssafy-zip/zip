@@ -10,5 +10,4 @@ public class UserInputDTO {
     String name;
     String phone;
     String email;
-    Role role;
 }
