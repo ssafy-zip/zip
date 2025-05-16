@@ -40,8 +40,11 @@ public class SecurityConfig {
                                 "/error","/favicon.ico","/**/*.css","/**/*.js",
                                 "/**/*.png","/**/*.jpg","/**/*.svg"
                         ).permitAll()
-                        // 로그인·회원가입만 공개
-                        .requestMatchers(HttpMethod.POST, "/api/users/login", "/api/users").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/users/login", "/api/users").permitAll()
+                                .requestMatchers(HttpMethod.GET,  "/api/boards/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/boards/**/comments").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/boards/**/comments/**").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/boards/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .authenticationManager(authenticationManager(http))
@@ -49,6 +52,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
