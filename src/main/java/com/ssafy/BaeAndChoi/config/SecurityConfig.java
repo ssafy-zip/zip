@@ -38,7 +38,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/swagger-ui/**","/v3/api-docs/**","/swagger-ui.html",
                                 "/error","/favicon.ico","/**/*.css","/**/*.js",
-                                "/**/*.png","/**/*.jpg","/**/*.svg"
+                                "/**/*.png","/**/*.jpg","/**/*.svg", "/api/news/**"
                         ).permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/users/login", "/api/users").permitAll()
                                 .requestMatchers(HttpMethod.GET,  "/api/boards/**").permitAll()
