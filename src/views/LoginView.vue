@@ -129,9 +129,14 @@ async function handleSubmit() {
       password: password.value,
     })
     const token = response.data.token
+    const role = response.data.role
 
     // 플러그인을 통한 전역 상태에 토큰 저장
     proxy.$setAuthToken(token)
+
+    // 로컬스토리지에 토큰과 역할(role) 저장
+    localStorage.setItem('authToken', token)
+    localStorage.setItem('userRole', role)
 
     // 아이디 저장
     if (rememberId.value) {
