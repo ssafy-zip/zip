@@ -1,11 +1,25 @@
 <template>
   <header class="header">
-    <!-- 상단: 로그인/회원가입 -->
+    <!-- 상단: 로그인/회원가입 or 내 정보/로그아웃 -->
     <div class="header-top">
       <div class="header-top-content">
         <ul class="auth-list">
-          <li class="auth-item"><router-link to="/login">로그인</router-link></li>
-          <li class="auth-item"><router-link to="/join">회원가입</router-link></li>
+          <template v-if="!isLoggedIn">
+            <li class="auth-item">
+              <router-link to="/login">로그인</router-link>
+            </li>
+            <li class="auth-item">
+              <router-link to="/join">회원가입</router-link>
+            </li>
+          </template>
+          <template v-else>
+            <li class="auth-item">
+              <router-link to="/profile" class="my-info">내 정보</router-link>
+            </li>
+            <li class="auth-item">
+              <button class="logout-button" @click="handleLogout">로그아웃</button>
+            </li>
+          </template>
         </ul>
       </div>
     </div>
@@ -20,19 +34,30 @@
       <nav class="header-nav">
         <ul class="nav-list">
           <li class="nav-item"><router-link to="/houseMap">매물</router-link></li>
-          <li class="nav-item"><router-link to="#">뉴스</router-link></li>
-          <li class="nav-item"><router-link to="bbs">커뮤니티</router-link></li>
+          <li class="nav-item"><router-link to="/news">뉴스</router-link></li>
+          <li class="nav-item"><router-link to="/bbs">커뮤니티</router-link></li>
         </ul>
       </nav>
-      <!-- 자리맞춤용 dummy element -->
       <div class="header-right"></div>
     </div>
   </header>
 </template>
 
-<script>
-export default {
-  name: 'AppHeader',
+<script setup>
+import { computed, getCurrentInstance } from 'vue'
+import { useRouter } from 'vue-router'
+
+defineOptions({ name: 'AppHeader' })
+
+const router = useRouter()
+const { proxy } = getCurrentInstance()
+
+// 전역 프로퍼티 $auth 에 저장된 token 값을 즉시 읽어옵니다.
+const isLoggedIn = computed(() => !!proxy.$auth.token)
+
+function handleLogout() {
+  proxy.$logout()
+  router.push('/login')
 }
 </script>
 
@@ -70,25 +95,34 @@ export default {
   margin: 0;
   padding: 0;
   font-size: 14px;
+  align-items: center;
+  height: 40px;
 }
 
-.auth-item a {
+.auth-item a,
+.my-info,
+.logout-button {
   color: white;
+  background: none;
+  border: none;
   text-decoration: none;
   font-size: 14px;
   padding: 4px 6px;
   border-radius: 4px;
+  cursor: pointer;
   transition:
     background-color 0.2s ease,
     color 0.2s ease;
 }
 
-.auth-item a:hover {
+.auth-item a:hover,
+.logout-button:hover {
   background-color: #374151;
   color: #60a5fa;
 }
 
-.auth-item a:active {
+.auth-item a:active,
+.logout-button:active {
   background-color: #2563eb;
   color: white;
 }

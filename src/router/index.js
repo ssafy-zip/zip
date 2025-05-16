@@ -9,6 +9,7 @@ import BbsView from '@/views/BbsView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    // { path: '/', name: 'Home', component: HomeView },
     { path: '/login', name: 'Login', component: LoginView },
     { path: '/join', name: 'Join', component: JoinView },
     { path: '/findId', name: 'FindId', component: FindIdView },
