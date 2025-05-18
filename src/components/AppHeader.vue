@@ -14,7 +14,7 @@
           </template>
           <template v-else>
             <li class="app-header__auth-item">
-              <router-link to="/profile">내 정보</router-link>
+              <router-link to="/myInfo">내 정보</router-link>
             </li>
             <li class="app-header__auth-item">
               <a @click.prevent="handleLogout">로그아웃</a>

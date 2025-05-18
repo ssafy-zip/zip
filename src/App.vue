@@ -21,6 +21,7 @@ body {
   height: 100%;
   font-family: Arial, sans-serif;
   font-size: 100%;
+  background-color: f9fafb;
 }
 
 .app {
