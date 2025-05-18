@@ -1,7 +1,7 @@
 <template>
   <div class="join-wrapper">
     <div class="form-header">
-      <a href="#"><img src="/image/logo/logo-black-large.png" class="form-logo" /></a>
+      <a href="#"><img src="/logo/logo-light-128.png" class="form-logo" /></a>
     </div>
 
     <form class="join-form" @submit.prevent="handleJoin">
@@ -197,10 +197,6 @@ body {
   justify-content: center;
   align-items: center;
   padding: 80px 20px;
-}
-
-.form-logo {
-  width: 128px;
 }
 
 .join-form {
