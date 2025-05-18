@@ -8,6 +8,7 @@ import BbsView from '@/views/BbsView.vue'
 import BbsWrite from '@/views/BbsWrite.vue'
 import BbsDetailView from '@/views/BbsDetailView.vue'
 import NewsListView from '@/views/NewsListView.vue'
+// import ProfileView from '@/views/ProfileView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,6 +23,7 @@ const router = createRouter({
     { path: '/bbs/write', name: 'BbsWrite', component: BbsWrite },
     { path: '/bbs/:id', name: 'BbsDetail', component: BbsDetailView, props: true },
     { path: '/news', name: 'News', component: NewsListView },
+    // { path: '/profile', name: 'Profile', component: ProfileView },
   ],
 })
 
