@@ -1,40 +1,41 @@
 <template>
-  <div class="bbs-wrapper">
+  <div class="bbs">
     <!-- 헤더 -->
-    <div class="bbs-header">
-      <div class="bbs-header-top">
-        <h2 class="bbs-header-title">커뮤니티</h2>
+    <div class="bbs__header">
+      <h2 class="bbs__header-title">커뮤니티</h2>
+    </div>
+
+    <!-- 게시판 네비게이션 -->
+    <div class="bbs__nav">
+      <!-- 탭 -->
+      <div class="bbs__tabs">
+        <button
+          v-for="tab in tabs"
+          :key="tab"
+          :class="['bbs__tab', { active: currentTab === tab }]"
+          @click="selectTab(tab)"
+        >
+          {{ tab }}
+        </button>
       </div>
 
-      <div class="bbs-header-center">
-        <!-- 탭 -->
-        <div class="bbs-tabs">
-          <button
-            v-for="tab in tabs"
-            :key="tab"
-            :class="['bbs-tab', { active: currentTab === tab }]"
-            @click="selectTab(tab)"
-          >
-            {{ tab }}
-          </button>
-        </div>
-
-        <!-- 정렬 + 글쓰기 -->
-        <div class="bbs-misc">
-          <select class="bbs-sort-select" v-model="sort" @change="fetchPosts">
-            <option value="latest">최신순</option>
-            <option value="oldest">오래된순</option>
-            <option value="views">조회순</option>
-            <option value="likes">추천순</option>
-            <option value="comments">댓글순</option>
-          </select>
-          <button class="bbs-write-button" @click="handleWrite">글쓰기</button>
-        </div>
+      <!-- 정렬 + 글쓰기 -->
+      <div class="bbs__misc">
+        <select class="bbs__sort-select" v-model="sort" @change="fetchPosts">
+          <option value="latest">최신순</option>
+          <option value="oldest">오래된순</option>
+          <option value="views">조회순</option>
+          <option value="likes">추천순</option>
+          <option value="comments">댓글순</option>
+        </select>
+        <button class="bbs__write-button" @click="handleWrite">
+          <i class="fa-solid fa-pen-to-square"></i> &nbsp; 글쓰기
+        </button>
       </div>
     </div>
 
     <!-- 게시글 테이블 -->
-    <div class="bbs-table">
+    <div class="bbs__table">
       <table>
         <thead>
           <tr>
@@ -49,7 +50,7 @@
         <tbody>
           <tr v-for="post in posts" :key="post.id">
             <td>{{ post.id }}</td>
-            <td class="bbs-record-title">
+            <td class="bbs__record-title">
               <!-- 상세 페이지로 이동하도록 경로 수정 -->
               <router-link :to="`/bbs/${post.id}`">{{ post.title }}</router-link>
             </td>
@@ -63,31 +64,40 @@
     </div>
 
     <!-- 검색 -->
-    <div class="bbs-search">
-      <select class="bbs-search-option" v-model="searchOption">
+    <div class="bbs__search">
+      <select class="bbs__search-option" v-model="searchOption">
         <option value="all">전체</option>
         <option value="title">제목</option>
         <option value="content">내용</option>
         <option value="writer">작성자</option>
       </select>
-      <input type="text" class="bbs-search-input" v-model="searchQuery" placeholder="검색어 입력" />
-      <button class="bbs-search-button" @click="searchPosts">
+      <input
+        type="text"
+        class="bbs__search-input"
+        v-model="searchQuery"
+        placeholder="검색어 입력"
+      />
+      <button class="bbs__search-button" @click="searchPosts">
         <i class="fa fa-search"></i>
       </button>
     </div>
 
     <!-- 페이지네이션 -->
-    <div class="bbs-pagination">
-      <button class="page-button" @click="prevPage">«</button>
+    <div class="bbs__pagination">
+      <button class="bbs__page-button" @click="prevPage">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
       <button
         v-for="page in totalPages"
         :key="page"
-        :class="['page-button', { active: currentPage === page }]"
+        :class="['bbs__page-button', { active: currentPage === page }]"
         @click="changePage(page)"
       >
         {{ page + 1 }}
       </button>
-      <button class="page-button" @click="nextPage">»</button>
+      <button class="bbs__page-button" @click="nextPage">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
     </div>
   </div>
 </template>
@@ -194,34 +204,31 @@ onMounted(fetchPosts)
 <style scoped>
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
 
-.bbs-wrapper {
+.bbs {
   min-width: 600px;
   max-width: 1000px;
   margin: 60px auto;
   padding: 0 20px;
 }
-.bbs-header {
+.bbs__header {
   display: flex;
   flex-direction: column;
   color: #111827;
 }
-.bbs-header-top {
-  display: flex;
-  align-items: center;
-  margin-bottom: 12px;
-}
-.bbs-header-title {
+
+.bbs__header-title {
   margin-bottom: 20px;
   color: #111827;
 }
-.bbs-header-center {
+
+.bbs__nav {
   display: flex;
   justify-content: space-between;
 }
-.bbs-tabs {
+.bbs__tabs {
   display: flex;
 }
-.bbs-tab {
+.bbs__tab {
   padding: 6px 16px;
   border: 1px solid #cbd5e1;
   background: white;
@@ -229,30 +236,32 @@ onMounted(fetchPosts)
   color: #374151;
   transition: all 0.2s;
 }
-.bbs-tab:first-child {
+.bbs__tab:first-child {
   border-top-left-radius: 8px;
 }
-.bbs-tab:last-child {
+.bbs__tab:last-child {
   border-top-right-radius: 8px;
 }
-.bbs-tab:hover {
+.bbs__tab:hover {
   background-color: #3b82f6;
   color: white;
   border-color: #3b82f6;
 }
-.bbs-tab.active {
+.bbs__tab.active {
   background-color: #1d4ed8;
   color: white;
   border-color: #1d4ed8;
   font-weight: bold;
 }
-.bbs-misc {
+
+.bbs__misc {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 10px;
 }
-.bbs-sort-select {
+.bbs__sort-select {
+  height: 35px;
   padding: 8px;
   font-size: 14px;
   border: 1px solid #cbd5e1;
@@ -261,9 +270,11 @@ onMounted(fetchPosts)
   color: #374151;
   cursor: pointer;
 }
-.bbs-write-button {
-  padding: 8px 16px;
+.bbs__write-button {
+  height: 35px;
+  padding: 4px 12px;
   background-color: #2563eb;
+  border: none;
   color: white;
   border-radius: 4px;
   font-size: 14px;
@@ -271,16 +282,17 @@ onMounted(fetchPosts)
   cursor: pointer;
   transition: background-color 0.2s;
 }
-.bbs-write-button:hover {
+.bbs__write-button:hover {
   background-color: #1d4ed8;
 }
-.bbs-table table {
+
+.bbs__table table {
   width: 100%;
   border-collapse: collapse;
   background: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
-.bbs-table th {
+.bbs__table th {
   padding: 10px;
   text-align: center;
   border-bottom: 2px solid #000;
@@ -288,56 +300,65 @@ onMounted(fetchPosts)
   color: #1f2937;
   font-weight: bold;
 }
-.bbs-table td {
+.bbs__table td {
   padding: 10px;
   text-align: center;
   border-bottom: 1px solid #000;
 }
-.bbs-record-title {
+.bbs__record-title {
   text-align: left;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   max-width: 400px;
 }
-.bbs-table a {
+.bbs__table a {
   color: inherit;
   text-decoration: none;
 }
-.bbs-search {
+
+.bbs__search {
   display: flex;
   justify-content: flex-end;
   margin: 20px 0;
-  gap: 8px;
 }
-.bbs-search-option,
-.bbs-search-input {
+
+.bbs__search-option,
+.bbs__search-input {
   padding: 8px;
   font-size: 14px;
   border: 1px solid #cbd5e1;
-  border-radius: 4px;
 }
-.bbs-search-input {
+
+.bbs__search-option {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.bbs__search-input {
   width: 200px;
 }
-.bbs-search-button {
+
+.bbs__search-button {
   background-color: #2563eb;
   border: none;
   color: white;
   padding: 8px 12px;
-  border-radius: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s;
 }
-.bbs-search-button:hover {
+.bbs__search-button:hover {
   background-color: #1d4ed8;
 }
-.bbs-pagination {
+
+.bbs__pagination {
   display: flex;
   justify-content: center;
   margin-top: 24px;
 }
-.page-button {
+.bbs__page-button {
   padding: 6px 10px;
   border: 1px solid #cbd5e1;
   background: white;
@@ -345,12 +366,12 @@ onMounted(fetchPosts)
   color: #374151;
   transition: all 0.2s;
 }
-.page-button:hover {
+.bbs__page-button:hover {
   background: #3b82f6;
   color: white;
   border-color: #3b82f6;
 }
-.page-button.active {
+.bbs__page-button.active {
   background: #1d4ed8;
   color: white;
   border-color: #1d4ed8;

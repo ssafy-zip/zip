@@ -1,7 +1,7 @@
 <template>
   <div class="join-wrapper">
     <div class="form-header">
-      <a href="#"><img src="/image/logo/logo-black-large.png" class="form-logo" /></a>
+      <a href="#"><img src="/logo/logo-light-128.png" class="form-logo" /></a>
     </div>
 
     <form class="join-form" @submit.prevent="handleJoin">
@@ -82,16 +82,14 @@
         <router-link to="/login"> 이미 계정이 있으신가요? 로그인 </router-link>
       </div>
     </form>
-
-    <!-- 약관 모달 -->
-    <div id="terms-modal" class="modal" :class="{ hidden: !showModal }">
-      <div class="modal-content">
-        <button class="close-button" @click="closeTerms">&times;</button>
-        <h3 id="terms-title">{{ modalTitle }}</h3>
-        <div id="terms-body" class="terms-text" v-html="modalContent"></div>
-      </div>
-    </div>
   </div>
+  <!-- 약관 모달 -->
+  <TermsModal
+    :visible="showTermsModal"
+    :title="modalTitle"
+    :content="modalContent"
+    @close="closeTerms"
+  />
 </template>
 
 <script setup>
@@ -99,6 +97,16 @@ import { ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import FormInput from '@/components/FormInput.vue'
+import TermsModal from '@/components/TermsModal.vue'
+
+import {
+  title as servicePolicyTitle,
+  content as servicePolicyContent,
+} from '@/constants/terms/service.js'
+import {
+  title as privacyPolicyTitle,
+  content as privacyPolicyContent,
+} from '@/constants/terms/privacy.js'
 
 defineOptions({ name: 'JoinView' })
 
@@ -116,7 +124,7 @@ const form = ref({
   agreePrivacy: false,
 })
 const agreeAll = ref(false)
-const showModal = ref(false)
+const showTermsModal = ref(false)
 const modalTitle = ref('')
 const modalContent = ref('')
 
@@ -141,16 +149,26 @@ function checkAll() {
 }
 
 // 약관 모달 열기
+
 async function openTerms(type) {
-  modalTitle.value = type === 'service' ? '서비스 이용약관' : '개인정보 수집 및 이용 동의'
-  const res = await fetch(`/terms/${type}.html`)
-  modalContent.value = await res.text()
-  showModal.value = true
+  switch (type) {
+    case 'service': {
+      modalTitle.value = servicePolicyTitle
+      modalContent.value = servicePolicyContent
+      break
+    }
+    case 'privacy': {
+      modalTitle.value = privacyPolicyTitle
+      modalContent.value = privacyPolicyContent
+      break
+    }
+  }
+  showTermsModal.value = true
 }
 
 // 약관 모달 닫기
 function closeTerms() {
-  showModal.value = false
+  showTermsModal.value = false
 }
 
 // 회원가입 처리
@@ -197,10 +215,6 @@ body {
   justify-content: center;
   align-items: center;
   padding: 80px 20px;
-}
-
-.form-logo {
-  width: 128px;
 }
 
 .join-form {
@@ -323,51 +337,5 @@ body {
   margin: 4px 0 12px;
   color: #e53e3e;
   font-size: 0.875rem;
-}
-
-/* 약관 모달 */
-.modal.hidden {
-  display: none;
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 24px;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
-  max-height: 80%;
-  overflow-y: auto;
-  position: relative;
-}
-
-.close-button {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  font-size: 20px;
-  font-weight: bold;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.terms-text p {
-  margin: 12px 0;
-  font-size: 14px;
-  color: #374151;
 }
 </style>

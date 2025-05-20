@@ -20,6 +20,8 @@ body {
   padding: 0;
   height: 100%;
   font-family: Arial, sans-serif;
+  font-size: 100%;
+  background-color: f9fafb;
 }
 
 .app {
@@ -29,6 +31,6 @@ body {
 }
 
 .main-container {
-  flex: 1;
+  flex-grow: 1;
 }
 </style>

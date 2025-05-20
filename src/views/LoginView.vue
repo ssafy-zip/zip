@@ -2,9 +2,7 @@
   <div class="login-wrapper">
     <!-- 로고 -->
     <div class="form-header">
-      <router-link to="/"
-        ><img src="/image/logo/logo-black-large.png" class="form-logo"
-      /></router-link>
+      <router-link to="/"><img src="/logo/logo-light-128.png" class="form-logo" /></router-link>
     </div>
 
     <!-- 로그인 폼 -->
@@ -181,10 +179,6 @@ body {
   justify-content: center;
   align-items: center;
   padding: 80px 20px;
-}
-
-.form-logo {
-  width: 128px;
 }
 
 .login-form {
