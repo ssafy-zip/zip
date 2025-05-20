@@ -6,6 +6,10 @@
           <i class="fa-solid fa-bars fa-2x"></i>
           <span>{{ sidebarOpen ? '닫기' : '열기' }}</span>
         </li>
+        <li class="house-map__sidebar-nav-item" @click="moveToCurrentLocation">
+          <i class="fa-solid fa-crosshairs fa-2x"></i>
+          <span>내 위치</span>
+        </li>
         <!--매물 검색 및 조회-->
         <li class="house-map__sidebar-nav-item">
           <i class="fa-solid fa-search fa-2x"></i>
@@ -29,10 +33,7 @@
     </nav>
 
     <!-- 사이드바 -->
-    <section
-      :class="['house-map__sidebar', { closed: !sidebarOpen }]"
-      :style="{ position: sidebarFix ? 'static' : 'absolute' }"
-    >
+    <section :class="['house-map__sidebar', { closed: !sidebarOpen }]">
       <div class="house-map__sidebar-content">
         <h2>사이드바 영역</h2>
       </div>
@@ -58,7 +59,7 @@ const map = ref(null)
 const isMapLoaded = computed(() => map.value)
 
 // Kakao 지도 스크립트 로드
-const loadKakaoMapScript = () => {
+const loadKakaoMapScript = async () => {
   return new Promise((resolve) => {
     if (window.kakao && window.kakao.maps) {
       resolve() // 이미 로드됨
@@ -75,22 +76,57 @@ const loadKakaoMapScript = () => {
     }
   })
 }
+/* 현재 위치 조회 */
+const getCurrentPosition = async () => {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) reject()
+    navigator.geolocation.getCurrentPosition(resolve, reject)
+  })
+}
+
+const moveToCurrentLocation = async () => {
+  const MAX_LEVEL = 5
+  try {
+    const position = await getCurrentPosition()
+    const { latitude, longitude } = position.coords
+
+    const targetLatLng = new window.kakao.maps.LatLng(latitude, longitude)
+    if (map.value) {
+      // 줌 아웃 상한
+      const currentLevel = map.value.getLevel()
+      if (currentLevel > MAX_LEVEL) {
+        map.value.setLevel(MAX_LEVEL)
+      }
+      // 현재 위치로 이동
+      map.value.panTo(targetLatLng)
+      const marker = new window.kakao.maps.Marker({ position: targetLatLng })
+      marker.setMap(map.value)
+    }
+  } catch (error) {
+    alert('위치 정보를 가져오지 못했습니다.')
+    console.log(error)
+  }
+}
 
 onMounted(async () => {
   await loadKakaoMapScript()
 
-  const options = {
-    center: new window.kakao.maps.LatLng(37.5665, 126.978), // 서울 시청
-    level: 5,
+  const options = { level: 5 }
+  try {
+    const position = await getCurrentPosition()
+    const { latitude, longitude } = position.coords
+    options.center = new window.kakao.maps.LatLng(latitude, longitude)
+  } catch {
+    options.center = new window.kakao.maps.LatLng(37.5665, 126.978) // 서울 시청
   }
 
   map.value = new window.kakao.maps.Map(mapContainer.value, options)
 
-  const markerPosition = new window.kakao.maps.LatLng(37.5665, 126.978)
-  const marker = new window.kakao.maps.Marker({
-    position: markerPosition,
-  })
+  const marker = new window.kakao.maps.Marker({ position: options.center })
   marker.setMap(map.value)
+
+  const zoomControl = new window.kakao.maps.ZoomControl()
+  map.value.addControl(zoomControl, window.kakao.maps.ControlPosition.RIGHT)
 })
 
 /* 사이드바 제어 */
