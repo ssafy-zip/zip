@@ -44,7 +44,7 @@
 </template>
 
 <script setup>
-import { computed, getCurrentInstance } from 'vue'
+import { computed, getCurrentInstance, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 defineOptions({ name: 'AppHeader' })
@@ -52,11 +52,23 @@ defineOptions({ name: 'AppHeader' })
 const router = useRouter()
 const { proxy } = getCurrentInstance()
 
-// 전역 프로퍼티 $auth 에 저장된 token 값을 즉시 읽어옵니다.
-const isLoggedIn = computed(() => !!proxy.$auth.token)
+// 로그인 상태 확인 (토큰 유무)
+const isLoggedIn = computed(() => !!proxy.$auth?.token)
 
+// 로그인 직후에 savedUserId를 설정
+watch()
+
+// 로그아웃 처리
 function handleLogout() {
+  // 1) localStorage에서 user 관련 키 삭제
+  localStorage.removeItem('authToken')
+  localStorage.removeItem('savedUserId')
+  localStorage.removeItem('userRole')
+
+  // 2) 인증 상태 초기화 (플러그인 사용 시)
   proxy.$logout()
+
+  // 3) 로그인 페이지로 이동
   router.push('/login')
 }
 </script>

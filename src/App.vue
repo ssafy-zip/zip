@@ -1,6 +1,7 @@
 <template>
   <div class="app">
     <AppHeader />
+    <button @click="goToChat" class="chat-btn">🤖 Chatbot</button>
     <main class="main-container">
       <router-view />
     </main>
@@ -9,8 +10,14 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
 import AppFooter from '@/components/AppFooter.vue'
+
+const router = useRouter()
+function goToChat() {
+  router.push({ name: 'Chat' })
+}
 </script>
 
 <style>

@@ -13,11 +13,13 @@ import MyInfoProfileView from '@/views/MyInfoView/MyInfoProfileView.vue'
 import MyInfoCommentsView from '@/views/MyInfoView/MyInfoCommentsView.vue'
 import MyInfoPostsView from '@/views/MyInfoView/MyInfoPostsView.vue'
 import MyInfoFavoritesView from '@/views/MyInfoView/MyInfoFavoritesView.vue'
+import ChatView from '@/views/ChatView.vue'
+import HomeView from '@/views/HomeView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    // { path: '/', name: 'Home', component: HomeView },
+    { path: '/', name: 'Home', component: HomeView },
     { path: '/login', name: 'Login', component: LoginView },
     { path: '/join', name: 'Join', component: JoinView },
     { path: '/findId', name: 'FindId', component: FindIdView },
@@ -27,6 +29,7 @@ const router = createRouter({
     { path: '/bbs/write', name: 'BbsWrite', component: BbsWriteView },
     { path: '/bbs/:id', name: 'BbsDetail', component: BbsDetailView, props: true },
     { path: '/news', name: 'News', component: NewsListView },
+    { path: '/chat', name: 'Chat', component: ChatView },
     {
       path: '/myInfo',
       name: 'MyInfo',

@@ -122,32 +122,34 @@ async function handleSubmit() {
   }
 
   try {
-    const response = await axios.post('/api/users/login', {
+    // 1) 로그인 API 호출
+    const { data } = await axios.post('/api/users/login', {
       userId: username.value,
       password: password.value,
     })
-    const token = response.data.token
-    const role = response.data.role
+    const { token, role, userId: serverUserId } = data
 
-    // 플러그인을 통한 전역 상태에 토큰 저장
+    // 2) 전역 상태에 토큰 저장
     proxy.$setAuthToken(token)
 
-    // 로컬스토리지에 토큰과 역할(role) 저장
+    // 3) 로컬스토리지에 토큰·롤·서버 userId 저장
     localStorage.setItem('authToken', token)
     localStorage.setItem('userRole', role)
+    // → 이 키는 채팅 API 등에 항상 필요하니까 지우지 마세요!
+    localStorage.setItem('savedUserId', serverUserId)
 
-    // 아이디 저장
+    // 4) “아이디 저장” 체크박스는 별도의 키로
     if (rememberId.value) {
-      localStorage.setItem('savedUserId', username.value)
+      localStorage.setItem('rememberedUsername', username.value)
     } else {
-      localStorage.removeItem('savedUserId')
+      localStorage.removeItem('rememberedUsername')
     }
 
-    // 로그인 성공 시 홈으로 이동
-    router.push('/')
+    // 5) 홈으로 이동
+    router.push({ name: 'Home' })
   } catch (err) {
     console.error(err)
-    if (err.response && err.response.status === 401) {
+    if (err.response?.status === 401) {
       errorMessage.value = '아이디 또는 비밀번호가 올바르지 않습니다.'
     } else {
       errorMessage.value = '로그인 중 오류가 발생했습니다.'
