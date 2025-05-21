@@ -1,4 +1,18 @@
 spring:
+  ai:
+    openai:
+      api-key: SECRET_OPENAI_API_KEY
+      chat-completions-url: https://api.openai.com/v1/chat/completions
+      use-streaming: false
+      chat:
+        options:
+          model: gpt-4o
+#          stream-usage: false
+#        completions-path: /v1/chat/completions
+  data:
+    mongodb:
+      uri: >-
+        mongodb://admin:admin@localhost:27017/chat_log?authSource=admin
   servlet:
     multipart:
       max-file-size: 100MB
@@ -40,6 +54,9 @@ app:
 logging:
   level:
     org.hibernate.SQL: debug
+    org.springframework.ai.openai: DEBUG
+    org.springframework.ai.chat: DEBUG
+    org.springframework.web.client.RestClient: TRACE
 server:
   port: 8080
   tomcat:
