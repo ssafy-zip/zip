@@ -1,6 +1,4 @@
 <template>
-  <AppHeader />
-
   <main class="home-content">
     <h2 class="home-title">🏠 서비스에 오신 것을 환영합니다!</h2>
     <p class="home-text">
@@ -8,13 +6,11 @@
       서비스를 이용해 보세요.
     </p>
   </main>
-
-  <AppFooter />
 </template>
 
 <script setup>
-import AppHeader from '@/components/AppHeader.vue'
-import AppFooter from '@/components/AppFooter.vue'
+// import AppHeader from '@/components/AppHeader.vue'
+// import AppFooter from '@/components/AppFooter.vue'
 
 defineOptions({ name: 'HomeView' })
 </script>
