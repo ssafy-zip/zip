@@ -47,7 +47,7 @@ public class UserController {
                 Map.of("role", role.name())
         );
 
-        return ResponseEntity.ok(new LoginResponseDTO(token, role));
+        return ResponseEntity.ok(new LoginResponseDTO(token, role, loginDTO.getUserId()));
     }
 
     @PostMapping
