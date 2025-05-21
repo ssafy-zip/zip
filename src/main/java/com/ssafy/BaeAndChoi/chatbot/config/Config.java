@@ -1,6 +1,7 @@
 package com.ssafy.BaeAndChoi.chatbot.config;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,10 +25,27 @@ public class Config {
 13. “⚠️ 유의사항” 섹션을 맨 끝에 한 줄씩 요약해 주세요.
 """;
 
+    public static final String NEWS_SUMMATION_PROMPT = """
+    아래에 있는 최근 20개의 뉴스 기사를 각 기사별로 간단하게 요약해주세요.
+    기사를 직접 검색해서 요약해주세요.
+    • 제목과 기사 URL이 함께 제공됩니다.
+    • “⚠️ 유의사항” 섹션으로 핵심 포인트를 맨 끝에 정리해 주세요.
+    """;
 
     @Bean
-    ChatClient chatClient(ChatClient.Builder builder){
+    @Qualifier("defaultChatClient")
+    public ChatClient defaultChatClient(ChatClient.Builder builder) {
         return builder.defaultSystem(DEFAULT_PROMPT)
+                .build();
+    }
+
+    /**
+     * 뉴스 요약 전용 ChatClient
+     */
+    @Bean
+    @Qualifier("newsSummationChatClient")
+    public ChatClient newsSummationChatClient(ChatClient.Builder builder) {
+        return builder.defaultSystem(NEWS_SUMMATION_PROMPT)
                 .build();
     }
 }

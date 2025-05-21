@@ -3,18 +3,17 @@ package com.ssafy.BaeAndChoi.chatbot.presentation;
 import com.ssafy.BaeAndChoi.chatbot.config.Config;
 import com.ssafy.BaeAndChoi.chatbot.domain.ChatMessage;
 import com.ssafy.BaeAndChoi.chatbot.repository.ChatMessageRepository;
+import com.ssafy.BaeAndChoi.news.application.NewsService;
+import com.ssafy.BaeAndChoi.news.dto.NewsResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClient.ChatClientRequestSpec;
 import reactor.core.publisher.Flux;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,21 +24,21 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AIController {
 
-    private final ChatClient chatClient;
     private final ChatMessageRepository chatMessageRepository;
+    private final NewsService newsService;
+
+    @Qualifier("defaultChatClient")
+    private final ChatClient defaultChatClient;
+    @Qualifier("newsSummationChatClient")
+    private final ChatClient newsSummationChatClient;
 
     @GetMapping("/history")
     public ResponseEntity<List<ChatMessage>> getChatHistory(
             @RequestParam String userId
     ) {
-
-        // 1) 비로그인 시 빈 리스트 반환
         if (userId == null || userId.isBlank()) {
-            return ResponseEntity.ok(Collections.emptyList());
+            return ResponseEntity.ok(List.of());
         }
-
-        // 2) 로그인 사용자는 userDetails에서 userId 추출
-//        String userId = userDetails.getUsername();
         List<ChatMessage> history = chatMessageRepository
                 .findByUserIdOrderByTimestampAsc(userId);
         return ResponseEntity.ok(history);
@@ -52,29 +51,23 @@ public class AIController {
     ) {
         String userInput = request.get("userInput");
 
-        // 1) GPT prompt 준비
-        ChatClientRequestSpec prompt = chatClient.prompt()
+        // 부동산 기본 ChatClient 사용
+        ChatClientRequestSpec prompt = defaultChatClient.prompt()
                 .system(Config.DEFAULT_PROMPT)
                 .user(userInput);
 
-        // 2) AI 응답 수신 (Flux → String)
         Flux<String> aiResponseFlux = prompt.stream().content();
         String content = aiResponseFlux.collectList()
                 .block()
                 .stream()
                 .collect(Collectors.joining());
 
-        // 3) 로그인 여부에 따라 대화 저장
-        if (userId != null) {
-//            String userId = userDetails.getUsername();
-
+        if (userId != null && !userId.isBlank()) {
             ChatMessage userMsg = new ChatMessage(userId, "user", userInput);
             chatMessageRepository.save(userMsg);
-
             ChatMessage assistantMsg = new ChatMessage(userId, "assistant", content);
             chatMessageRepository.save(assistantMsg);
 
-            // 4) 타임스탬프 반환
             return ResponseEntity.ok(Map.of(
                     "role", "assistant",
                     "content", content,
@@ -82,7 +75,6 @@ public class AIController {
                     "assistantTimestamp", String.valueOf(assistantMsg.getTimestamp())
             ));
         } else {
-            // 비로그인 사용자는 저장 없이 응답만 반환
             return ResponseEntity.ok(Map.of(
                     "role", "assistant",
                     "content", content
@@ -90,4 +82,33 @@ public class AIController {
         }
     }
 
+    // 최근 뉴스 20개를 보고, 오늘의 뉴스 요약해주는 기능
+    @GetMapping("/newsSummation")
+    public ResponseEntity<Map<String, String>> getNewsSummation() {
+        // 1) 최근 20개 뉴스 조회
+        List<NewsResponseDTO> newsList = newsService.findRecent(20);
+
+        // 2) 뉴스 목록을 포함한 사용자 입력 생성
+        StringBuilder sb = new StringBuilder();
+        for (NewsResponseDTO n : newsList) {
+            sb.append("제목: ").append(n.getTitle()).append("\n");
+            sb.append("기사 링크 : ").append(n.getLink()).append("\n");
+        }
+        String userInput = sb.toString();
+
+        // 3) 뉴스 요약 전용 ChatClient 사용
+        ChatClientRequestSpec prompt = newsSummationChatClient.prompt()
+                .system(Config.NEWS_SUMMATION_PROMPT)
+                .user(userInput);
+
+        // 4) AI 응답 수신 및 문자열 합치기
+        Flux<String> aiFlux = prompt.stream().content();
+        String summary = aiFlux.collectList()
+                .block()
+                .stream()
+                .collect(Collectors.joining());
+
+        // 5) 요약 반환
+        return ResponseEntity.ok(Map.of("summary", summary));
+    }
 }
