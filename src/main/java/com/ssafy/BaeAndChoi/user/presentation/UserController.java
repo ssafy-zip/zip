@@ -3,9 +3,7 @@ package com.ssafy.BaeAndChoi.user.presentation;
 import com.ssafy.BaeAndChoi.config.util.JwtUtil;
 import com.ssafy.BaeAndChoi.user.application.UserService;
 import com.ssafy.BaeAndChoi.user.domain.User;
-import com.ssafy.BaeAndChoi.user.dto.LoginDTO;
-import com.ssafy.BaeAndChoi.user.dto.LoginResponseDTO;
-import com.ssafy.BaeAndChoi.user.dto.UserInputDTO;
+import com.ssafy.BaeAndChoi.user.dto.*;
 import com.ssafy.BaeAndChoi.user.enums.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +11,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticatedPrincipal;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -55,18 +56,37 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(request));
     }
 
-    @GetMapping("getUserById")
-    public ResponseEntity<User> findById(@RequestParam String userId) {
-        return ResponseEntity.ok(userService.getUser(userId));
+    @GetMapping("getUserInfo")
+    public ResponseEntity<UserDetailResponseDTO> findById(@AuthenticationPrincipal UserDetails userDetails) {
+        String userId = userDetails.getUsername();
+        User user = userService.getUser(userId);
+        UserDetailResponseDTO dto = UserDetailResponseDTO.builder()
+                .id(user.getUserId())
+                .name(user.getName())
+                .phone(user.getPhone())
+                .email(user.getEmail())
+                .build();
+        return ResponseEntity.ok(dto);
     }
 
-    @GetMapping("deleteUserId")
-    public ResponseEntity<String> deleteUser(@RequestParam String userId) {
+    @DeleteMapping("deleteUserId")
+    public ResponseEntity<String> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {
+        String userId = userDetails.getUsername();
+
         return ResponseEntity.ok(userService.deleteUserBy(userId));
     }
 
     @PostMapping("updateUser")
-    public ResponseEntity<String> updateUser(@RequestBody UserInputDTO request) {
-        return ResponseEntity.ok(userService.updateUser(request));
+    public ResponseEntity<String> updateUser(@RequestBody UserUpdateRequestDTO request,
+     @AuthenticationPrincipal UserDetails userDetails) {
+        String userId = userDetails.getUsername();
+        return ResponseEntity.ok(userService.updateUser(request, userId));
+    }
+
+    @PostMapping("updatePassword")
+    public ResponseEntity<String> updatePassword(@RequestBody String newPassword,@AuthenticationPrincipal UserDetails userDetails) {
+        String userId = userDetails.getUsername();
+        log.info("비밀번호 변경 진행");
+        return ResponseEntity.ok(userService.updatePassword(userId,newPassword));
     }
 }

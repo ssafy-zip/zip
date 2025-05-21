@@ -3,13 +3,13 @@ package com.ssafy.BaeAndChoi.user.application;
 import com.ssafy.BaeAndChoi.exception.BadRequestException;
 import com.ssafy.BaeAndChoi.user.domain.User;
 import com.ssafy.BaeAndChoi.user.dto.LoginDTO;
+import com.ssafy.BaeAndChoi.user.dto.UserDetailResponseDTO;
 import com.ssafy.BaeAndChoi.user.dto.UserInputDTO;
+import com.ssafy.BaeAndChoi.user.dto.UserUpdateRequestDTO;
 import com.ssafy.BaeAndChoi.user.enums.Role;
 import com.ssafy.BaeAndChoi.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -45,22 +45,33 @@ public class UserService {
     }
 
     @Transactional
-    public String updateUser(UserInputDTO input){
-        User user = userRepository.findByUserId(input.getUserId())
+    public String updateUser(UserUpdateRequestDTO input, String userId){
+        User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new BadRequestException("User does not exist"));
 
-        user.update(input);
+        user.setName(input.getName());
+        user.setPhone(input.getPhone());
+        user.setEmail(input.getEmail());
+        userRepository.save(user);
+
         return "success update user";
     }
 
     @Transactional
     public String deleteUserBy(String userId) {
-        if(userRepository.findByUserId(userId) == null){
-            throw new BadRequestException("User not found");
-        }
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequestException("User does not exist"));
 
         userRepository.deleteByUserId(userId);
         return "success delete user";
     }
 
+    @Transactional
+    public String updatePassword(String userId, String newPassword) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequestException("User does not exist"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        return "success update password";
+    }
 }

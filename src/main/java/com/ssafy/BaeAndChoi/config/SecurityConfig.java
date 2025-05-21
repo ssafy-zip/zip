@@ -41,7 +41,7 @@ public class SecurityConfig {
                                 "/**/*.png","/**/*.jpg","/**/*.svg", "/api/news/**","/api/chat/**"
                         ).permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/users/login", "/api/users/**").permitAll()
-                                .requestMatchers(HttpMethod.GET,  "/api/boards/**","/api/chat/**").permitAll()
+                                .requestMatchers(HttpMethod.GET,  "/api/boards/**","/api/chat/**","/api/users/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/boards/**/comments").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/boards/**/comments/**").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/boards/**").authenticated()
