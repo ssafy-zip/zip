@@ -28,8 +28,8 @@
 
 <script setup>
 import InputModal from './InputModal.vue'
-
 import { ref, computed } from 'vue'
+import axios from 'axios'
 
 defineProps({
   visible: Boolean,
@@ -38,15 +38,31 @@ const emit = defineEmits(['submit', 'close'])
 
 const password = ref('')
 const passwordConfirm = ref('')
+const error = ref('')
 const isValid = computed(() => {
   return 6 <= password.value.length && password.value === passwordConfirm.value
 })
 
 const close = () => emit('close')
 
-const submit = () => {
-  emit('submit', password.value)
-  close()
+// 제출 시 API 호출
+const submit = async () => {
+  if (!isValid.value) {
+    error.value = '비밀번호가 일치하지 않거나 6자 미만입니다.'
+    return
+  }
+  try {
+    const token = localStorage.getItem('authToken')
+    // updatePassword API 호출 (/api/users/updatePassword)
+    await axios.post('/api/users/updatePassword', password.value, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    emit('updated')
+    close()
+  } catch (err) {
+    console.error('비밀번호 변경 실패', err)
+    error.value = '변경에 실패했습니다. 다시 시도해주세요.'
+  }
 }
 </script>
 
