@@ -1,4 +1,4 @@
-package com.ssafy.BaeAndChoi.interest.domain;
+package com.ssafy.BaeAndChoi.lwdCd.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,11 +21,11 @@ public class LwdCd {
     private String sidoName;
 
     /** 시군구 이름 (예: 강남구, 수원시 등) */
-    @Column(name = "sgg_name", length = 30, nullable = false)
+    @Column(name = "sgg_name", length = 30)
     private String sggName;
 
     /** 읍면동 이름 (예: 역삼동, 장안동 등) */
-    @Column(name = "umd_name", length = 30, nullable = false)
+    @Column(name = "umd_name", length = 30)
     private String umdName;
 }
 
