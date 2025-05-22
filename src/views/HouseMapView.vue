@@ -50,20 +50,29 @@
         <article class="house-map__search-filters">
           <div class="house-map__search-filter-header">
             <div class="house-map__search-filter-wrapper">
-              <select class="house-map__search-selectBox">
-                <option value="">시도</option>
-                <option value="">서울특별시</option>
-                <option value="">부산광역시</option>
+              <select class="house-map__search-selectBox" v-model="selectedSido">
+                <option value="" disabled selected>시/도</option>
+                <option :value="sidoItem.code" v-for="sidoItem in sidoList" :key="sidoItem.code">
+                  {{ sidoItem.sidoName }}
+                </option>
               </select>
-              <span>
-                <i class="fas fa-chevron-right"></i>
-              </span>
-              <select class="house-map__search-selectBox">
-                <option value="">시군구</option>
-              </select>
+
               <i class="fas fa-chevron-right"></i>
-              <select class="house-map__search-selectBox">
-                <option value="">읍면동</option>
+
+              <select class="house-map__search-selectBox" v-model="selectedSgg">
+                <option value="" disabled selected>시/군/구</option>
+                <option :value="sggItem.code" v-for="sggItem in sggList" :key="sggItem.code">
+                  {{ sggItem.sggName }}
+                </option>
+              </select>
+
+              <i class="fas fa-chevron-right"></i>
+
+              <select class="house-map__search-selectBox" v-model="selectedUmd">
+                <option value="" disabled selected>읍/면/동</option>
+                <option :value="umdItem.code" v-for="umdItem in umdList" :key="umdItem.code">
+                  {{ umdItem.umdName }}
+                </option>
               </select>
             </div>
           </div>
@@ -104,7 +113,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
+import axios from 'axios'
 
 const favorited = ref(true)
 
@@ -113,6 +123,58 @@ const openSidebar = ref(false)
 const mapContainer = ref(null)
 const map = ref(null)
 const isMapLoaded = computed(() => map.value)
+
+const sidoList = ref([])
+const sggList = ref([])
+const umdList = ref([])
+
+const selectedSido = ref('')
+const selectedSgg = ref('')
+const selectedUmd = ref('')
+
+// 시도 조회
+const updateSido = async () => {
+  const response = await axios.get(`/api/lwdCd/sido`)
+  sidoList.value = response.data
+}
+// 시군구 조회
+const updateSgg = async () => {
+  if (selectedSido.value) {
+    const response = await axios.get(`/api/lwdCd/sgg/${selectedSido.value.slice(0, 2)}`)
+    sggList.value = response.data
+  }
+  selectedSgg.value = ''
+}
+
+// 읍면동 조회
+const updateUmd = async () => {
+  if (selectedSgg.value) {
+    const response = await axios.get(`/api/lwdCd/umd/${selectedSgg.value.slice(0, 5)}`)
+    umdList.value = response.data
+  }
+  selectedUmd.value = ''
+}
+
+// 시도 선택
+watch(
+  () => selectedSido.value,
+  () => {
+    updateSgg()
+    updateUmd()
+  },
+)
+// 시군구 선택
+watch(
+  () => selectedSgg.value,
+  () => {
+    updateUmd()
+  },
+)
+// 읍면동 선택
+// watch(
+//   () => selectedUmd,
+//   () => {},
+// )
 
 // Kakao 지도 스크립트 로드
 const loadKakaoMapScript = async () => {
@@ -165,6 +227,8 @@ const moveToCurrentLocation = async () => {
 }
 
 onMounted(async () => {
+  updateSido()
+
   await loadKakaoMapScript()
 
   const options = { level: 5 }
