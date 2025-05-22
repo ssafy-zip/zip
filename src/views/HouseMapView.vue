@@ -40,10 +40,16 @@
         <!--검색 상자-->
         <article class="house-map__sidebar-search-box">
           <div class="house-map__search-input-wrapper">
-            <button class="house-map__search-button">
+            <button class="house-map__search-button" @click="searchByKeyword">
               <i class="fas fa-search"></i>
             </button>
-            <input type="text" placeholder="검색" class="house-map__search-keyword" />
+            <input
+              type="text"
+              placeholder="검색"
+              class="house-map__search-keyword"
+              v-model="aptNm"
+              @keydown.enter="searchByKeyword"
+            />
           </div>
         </article>
         <!--검색 필터-->
@@ -102,17 +108,28 @@
       <!-- 콘텐츠: 검색된 아파트 목록 -->
       <section class="house-map__sidebar-thread">
         <div class="house-map__sidebar-thread-container">
-          <div
-            class="house-map__apt-info"
-            v-for="item in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"
-            :key="item"
-          >
-            <div class="house-map__apt-info-title">아파트 이름</div>
+          <div class="house-map__apt-info" v-for="item in apartments" :key="item.aptSeq">
+            <div class="house-map__apt-info-title">{{ item.aptNm }}</div>
             <ul class="house-map__apt-info-detail">
-              <li><span>(최소 거래가)</span> - <span>(최대 거래가)</span> 만원</li>
-              <li><span>(최소 면적)</span> - <span>(최대 면적)</span> ㎡</li>
-              <li>(주소)</li>
-              <li>매물 수: <span>3</span></li>
+              <li>
+                <span>{{
+                  Math.min(...item.deals.map((deal) => Number(deal.dealAmount.replace(/,/g, ''))))
+                }}</span>
+                -
+                <span>{{
+                  Math.max(...item.deals.map((deal) => Number(deal.dealAmount.replace(/,/g, ''))))
+                }}</span>
+                만원
+              </li>
+              <li>
+                <span>{{ Math.min(...item.deals.map((deal) => Number(deal.excluUseAr))) }}</span>
+                -
+                <span>{{ Math.max(...item.deals.map((deal) => Number(deal.excluUseAr))) }}</span>
+                ㎡
+              </li>
+              <li>
+                거래 이력 수: <span>{{ item.deals.length }}</span>
+              </li>
             </ul>
             <button class="house-map__apt-info-favorite" :class="{ favorited }">
               <i v-if="favorited" class="fas fa-star"></i>
@@ -260,6 +277,21 @@ const moveToCurrentLocation = async () => {
     alert('위치 정보를 가져오지 못했습니다.')
     console.log(error)
   }
+}
+
+/* */
+const aptNm = ref('')
+const apartments = ref([])
+
+const searchByKeyword = async () => {
+  console.log('검색어:', aptNm.value)
+  const result = await axios.get('/api/apartments/apt', {
+    params: {
+      aptNm: aptNm.value,
+    },
+  })
+  console.log('검색 결과', result.data)
+  apartments.value = result.data
 }
 
 onMounted(async () => {
