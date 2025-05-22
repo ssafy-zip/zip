@@ -9,8 +9,16 @@
         placeholder="가입한 이메일"
         required
       />
-      <button type="submit" class="find-button">아이디 찾기</button>
+      <button type="submit" class="find-button" :disabled="isLoading">
+        {{ isLoading ? '전송 중…' : '아이디 찾기' }}
+      </button>
     </form>
+
+    <!-- 결과 메시지 -->
+    <div v-if="message" class="find-message" :class="{ error: isError, success: !isError }">
+      {{ message }}
+    </div>
+
     <div class="find-links">
       <router-link to="/login">로그인</router-link> |
       <router-link to="/findPassword">비밀번호 찾기</router-link>
@@ -20,17 +28,40 @@
 
 <script setup>
 import { ref } from 'vue'
+import axios from 'axios'
 import FormInput from '@/components/FormInput.vue'
 
 const email = ref('')
+const isLoading = ref(false)
+const message = ref('') // 화면에 띄울 메시지
+const isError = ref(false) // 에러 여부
 
-const handleFindId = () => {
+const handleFindId = async () => {
   if (!email.value) {
-    alert('이메일을 입력하세요.')
+    message.value = '이메일을 입력하세요.'
+    isError.value = true
     return
   }
-  // TODO: 서버 연동
-  alert(`입력된 이메일: ${email.value}`)
+
+  // 이전 메시지 초기화
+  message.value = ''
+  isError.value = false
+  isLoading.value = true
+
+  try {
+    const { data } = await axios.post('/api/users/find-id', {
+      email: email.value,
+    })
+    // 성공 메시지
+    message.value = data.message
+    isError.value = false
+  } catch (err) {
+    console.error(err)
+    message.value = err.response?.data?.message || '아이디 찾기에 실패했습니다.'
+    isError.value = true
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 
@@ -64,8 +95,30 @@ const handleFindId = () => {
   margin-top: 10px;
 }
 
-.find-button:hover {
+.find-button:disabled {
+  background-color: #93c5fd;
+  cursor: not-allowed;
+}
+
+.find-button:hover:enabled {
   background-color: #1d4ed8;
+}
+
+/* 결과 메시지 스타일 */
+.find-message {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 14px;
+}
+.find-message.success {
+  background-color: #ecfdf5;
+  color: #065f46;
+}
+.find-message.error {
+  background-color: #fce7e7;
+  color: #991b1b;
 }
 
 .find-links {

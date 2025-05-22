@@ -15,6 +15,7 @@ import MyInfoPostsView from '@/views/MyInfoView/MyInfoPostsView.vue'
 import MyInfoFavoritesView from '@/views/MyInfoView/MyInfoFavoritesView.vue'
 import ChatView from '@/views/ChatView.vue'
 import HomeView from '@/views/HomeView.vue'
+import ResetPasswordForm from '@/views/ResetPasswordForm.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,6 +25,7 @@ const router = createRouter({
     { path: '/join', name: 'Join', component: JoinView },
     { path: '/findId', name: 'FindId', component: FindIdView },
     { path: '/findPassword', name: 'FindPassword', component: FindPasswordView },
+    { path: '/reset-password', name: 'ResetPasswordForm', component: ResetPasswordForm },
     { path: '/houseMap', name: 'HouseMap', component: HouseMapView },
     { path: '/bbs', name: 'Bbs', component: BbsView },
     { path: '/bbs/write', name: 'BbsWrite', component: BbsWriteView },
