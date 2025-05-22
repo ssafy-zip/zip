@@ -1,21 +1,40 @@
 <template>
   <section class="myInfo__content-container">
-    <div class="info-tile">
+    <!-- 카테고리별 카드 -->
+    <div class="info-tile" v-for="(catBlock, idx) in filteredCategories" :key="idx">
+      <!-- 카드 헤더: 카테고리 이름 -->
       <div class="info-tile__title-container">
-        <div class="info-tile__title">내가 작성한 글</div>
+        <div class="info-tile__title">
+          {{ categoryLabels[catBlock.category] || catBlock.category }}
+        </div>
       </div>
       <div class="info-tile__seperator"></div>
+
+      <!-- 카드 콘텐츠: 게시글 리스트 -->
       <div class="info-tile__content">
-        <div class="tile-item-container" v-for="(post, index) in posts" :key="index">
+        <div class="tile-item-container" v-for="article in catBlock.articles" :key="article.id">
           <div class="tile-inner-wrapper">
-            <div class="tile-label">게시글 {{ index + 1 }}</div>
-            <div class="tile-action">
-              <a :href="post.link" class="tile-link">{{ post.title }}</a>
+            <div class="tile-label">
+              {{ formatDate(article.createdAt) }}
             </div>
+            <!-- BbsDetailView로 연결: 라우터 이름 'BbsDetail', props:id -->
+            <router-link
+              :to="{ name: 'BbsDetail', params: { id: article.id } }"
+              class="tile-value tile-link"
+            >
+              {{ article.title }}
+            </router-link>
           </div>
         </div>
+
+        <!-- 전체 보기 링크 -->
         <div class="tile-action">
-          <a href="#" class="tile-link">전체 보기</a>
+          <router-link
+            :to="{ path: '/myPage/posts', query: { category: catBlock.category } }"
+            class="tile-link"
+          >
+            전체 보기
+          </router-link>
         </div>
       </div>
     </div>
@@ -23,26 +42,63 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted, getCurrentInstance } from 'vue'
+import baseURL from '@/baseURL'
 
-// 작성 글
-const posts = ref([
-  { title: '전세 사기 어떻게 피하나요?', link: '#' },
-  { title: '서울 추천 지역 알려주세요!', link: '#' },
-])
+// 인증 토큰 가져오기
+const { proxy } = getCurrentInstance()
+
+// 전체 카테고리별 게시글 블록
+const categories = ref([])
+
+// PostType 코드 → 한글 레이블
+const categoryLabels = {
+  NOTICE: '공지',
+  INFO: '정보',
+  QUESTION: '질문',
+  PROMOTION: '홍보',
+  CHAT: '잡담',
+}
+
+// 글이 하나 이상인 카테고리만 보여주는 계산 속성
+const filteredCategories = computed(() =>
+  categories.value.filter((block) => Array.isArray(block.articles) && block.articles.length > 0),
+)
+
+// ISO 날짜 문자열 → "YYYY.MM.DD" 포맷
+function formatDate(iso) {
+  const d = new Date(iso)
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}.${mm}.${dd}`
+}
+
+// 마운트 시 서버에서 데이터 로드
+onMounted(async () => {
+  try {
+    const { data } = await baseURL.get('/api/users/myPage/myArticleListsByCategory', {
+      headers: {
+        Authorization: `Bearer ${proxy.$auth.token}`,
+      },
+    })
+    categories.value = data
+  } catch (err) {
+    console.error('내 게시글 불러오기 실패:', err)
+  }
+})
 </script>
 
 <style scoped>
-/* 콘텐츠 영역 */
 .myInfo__content-container {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  width: 100%;
 }
 
-/* 공통 카드 */
 .info-tile {
-  background-color: #fff;
+  background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   padding: 0 24px 16px;
@@ -51,11 +107,9 @@ const posts = ref([
 
 .info-tile__title-container {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   height: 64px;
 }
-
 .info-tile__title {
   font-size: 18px;
   font-weight: bold;
@@ -64,7 +118,7 @@ const posts = ref([
 
 .info-tile__seperator {
   height: 1px;
-  background-color: #e5e7eb;
+  background: #e5e7eb;
   margin-bottom: 16px;
 }
 
@@ -74,60 +128,36 @@ const posts = ref([
   gap: 16px;
 }
 
-/* 항목 한 줄 */
 .tile-item-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
 .tile-inner-wrapper {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
-
 .tile-label {
   font-size: 14px;
   color: #6b7280;
 }
-
 .tile-value {
   font-size: 16px;
   font-weight: 500;
   color: #1f2937;
 }
 
-.tile-button {
-  color: #2563eb;
-  font-size: 14px;
-  background: none;
-  border: none;
-  cursor: pointer;
+.tile-action {
+  margin-top: 16px;
+  text-align: right;
 }
-.tile-button:hover {
-  text-decoration: underline;
-}
-
 .tile-link {
   color: #2563eb;
   font-size: 14px;
   text-decoration: none;
 }
-
 .tile-link:hover {
   text-decoration: underline;
-}
-
-.tile-action {
-  margin-top: 16px;
-  text-align: right;
-}
-
-/* 계정 삭제 경고 */
-.danger-tile {
-  border-color: #fecaca;
-  background-color: #fef2f2;
-  color: #991b1b;
 }
 </style>
