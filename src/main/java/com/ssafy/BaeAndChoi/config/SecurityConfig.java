@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,6 +20,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -31,8 +40,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(cs -> cs.disable())
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .cors(withDefaults()) // 기본 CORS 설정
+                .sessionManagement(sessionManagement ->
+                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션을 무상태로 설정
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .ignoringRequestMatchers("/api/**"))
+                .formLogin(formLogin -> formLogin.disable()) // 폼 로그인 비활성화
+                .httpBasic(httpBasic -> httpBasic.disable()) // HTTP Basic 인증 비활성화
+//                .exceptionHandling(exceptionHandling ->
+//                        exceptionHandling.authenticationEntryPoint(new RestAuthenticationEntryPoint())) // 예외 처리 설정
                 .authorizeHttpRequests(auth -> auth
                         // swagger, static
                         .requestMatchers(
@@ -40,7 +57,7 @@ public class SecurityConfig {
                                 "/error","/favicon.ico","/**/*.css","/**/*.js",
                                 "/**/*.png","/**/*.jpg","/**/*.svg", "/api/news/**","/api/chat/**"
                         ).permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/users/login", "/api/users/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/users/**","/api/users/login").permitAll()
                                 .requestMatchers(HttpMethod.GET,  "/api/boards/**","/api/chat/**","/api/users/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/boards/**/comments").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/boards/**/comments/**").authenticated()
