@@ -60,6 +60,8 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+	// AWS S3
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
 	// XML 파싱
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.3'
