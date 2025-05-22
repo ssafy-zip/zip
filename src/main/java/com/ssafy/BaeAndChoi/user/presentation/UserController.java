@@ -1,5 +1,7 @@
 package com.ssafy.BaeAndChoi.user.presentation;
 
+import com.ssafy.BaeAndChoi.board.application.BoardService;
+import com.ssafy.BaeAndChoi.board.application.CommentService;
 import com.ssafy.BaeAndChoi.config.util.JwtUtil;
 import com.ssafy.BaeAndChoi.email.application.EmailService;
 import com.ssafy.BaeAndChoi.email.domain.FindIdRequest;
@@ -20,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -30,6 +33,8 @@ public class UserController {
 
     private final UserService userService;
     private final EmailService emailService;
+    private final BoardService boardService;
+    private final CommentService commentService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
@@ -119,5 +124,29 @@ public class UserController {
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestParam String userId, @RequestBody ResetPasswordRequestDTO dto){
         return ResponseEntity.ok(userService.resetPassword(userId,dto.getPassword()));
+    }
+
+    /**
+     * 내가 작성한 게시글 목록 반환
+     */
+    @GetMapping("/myPage/myArticleListsByCategory")
+    public ResponseEntity<List<CategoryArticlesDto>> myArticleListsByCategory(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        String userId = userDetails.getUsername();
+        var dtoList = boardService.findMyArticlesByCategory(userId);
+        return ResponseEntity.ok(dtoList);
+    }
+
+    /**
+     * 내가 작성한 댓글 목록 반환
+     */
+    @GetMapping("/myPage/myCommentsListsByCategory")
+    public ResponseEntity<List<CategoryCommentsDto>> myCommentsListsByCategory(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        String userId = userDetails.getUsername();
+        List<CategoryCommentsDto> result = commentService.findMyCommentsByCategory(userId);
+        return ResponseEntity.ok(result);
     }
 }

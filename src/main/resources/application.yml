@@ -52,8 +52,6 @@ app:
       - http://localhost:3000
       - http://localhost:8080
       - http://localhost:5173
-      - https://yaguhang.kro.kr:7443
-      - https://yaguhang.kro.kr:8443
   auth:
     tokenSecret: SECRET_JWT_SECRET
     tokenExpirationMsec: 864000000
