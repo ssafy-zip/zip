@@ -56,19 +56,18 @@
         <article class="house-map__search-filters">
           <div class="house-map__search-filter-header">
             <!--현재 지도 위치로 초기화-->
-            <div>
-              <button
-                class="house-map__selete_current_position_button"
-                @click="setBjdFilterToMapCenter"
-              >
-                <i class="fas fa-crosshairs"></i>
-              </button>
-            </div>
+            <button
+              class="house-map__selete_current_position_button"
+              @click="setBjdFilterToMapCenter"
+            >
+              <i class="fas fa-crosshairs"></i>
+            </button>
+
             <div class="house-map__search-filter-wrapper">
               <select
                 class="house-map__search-selectBox"
                 v-model="selectedSido"
-                @change="updateSgg"
+                @change="updateSggList"
               >
                 <option value="" disabled selected>시/도</option>
                 <option
@@ -82,7 +81,11 @@
 
               <i class="fas fa-chevron-right"></i>
 
-              <select class="house-map__search-selectBox" v-model="selectedSgg" @change="updateUmd">
+              <select
+                class="house-map__search-selectBox"
+                v-model="selectedSgg"
+                @change="updateUmdList"
+              >
                 <option value="" disabled selected>시/군/구</option>
                 <option
                   :value="sggItem.code.slice(0, 5)"
@@ -105,6 +108,7 @@
           </div>
         </article>
       </section>
+
       <!-- 콘텐츠: 검색된 아파트 목록 -->
       <section class="house-map__sidebar-thread">
         <div class="house-map__sidebar-thread-container">
@@ -155,36 +159,43 @@ import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
 /* === 법정동 조회 === */
+// 법정동 목록
 const sidoList = ref([])
 const sggList = ref([])
 const umdList = ref([])
-
+// 선택된 법정동
 const selectedSido = ref('')
 const selectedSgg = ref('')
 const selectedUmd = ref('')
 
 // 법정동 목록 갱신
-// 시/도
-const updateSido = async () => {
+const updateSidoList = async () => {
   const response = await axios.get(`/api/lwdCd/sido`)
   sidoList.value = response.data
-}
-// 시/군/구
-const updateSgg = async () => {
-  if (selectedSido.value) {
-    const response = await axios.get(`/api/lwdCd/sgg/${selectedSido.value.slice(0, 2)}`)
-    sggList.value = response.data
-  }
+
+  selectedSido.value = ''
   selectedSgg.value = ''
   selectedUmd.value = ''
 }
+const updateSggList = async () => {
+  if (selectedSido.value) {
+    const response = await axios.get(`/api/lwdCd/sgg/${selectedSido.value.slice(0, 2)}`)
+    sggList.value = response.data
+  } else {
+    sggList.value = []
+  }
 
-// 읍/면/동
-const updateUmd = async () => {
+  selectedSgg.value = ''
+  selectedUmd.value = ''
+}
+const updateUmdList = async () => {
   if (selectedSgg.value) {
     const response = await axios.get(`/api/lwdCd/umd/${selectedSgg.value.slice(0, 5)}`)
     umdList.value = response.data
+  } else {
+    umdList.value = []
   }
+
   selectedUmd.value = ''
 }
 
@@ -239,19 +250,29 @@ const coord2RegionCode = async (lat, lng) => {
 }
 
 /* 법정동 필터를 인자로 전달한 위치로 갱신 */
-const setBjdFilter = async (position) => {
-  const result = await coord2RegionCode(position.coords.latitude, position.coords.longitude)
-
+const setBjdFilter = async (latitude, longitude) => {
+  const result = await coord2RegionCode(latitude, longitude)
   selectedSido.value = result.code.slice(0, 2)
-  await updateSgg()
+  if (sidoList.value.every((item) => item.code.slice(0, 2) !== selectedSido.value.slice(0, 2))) {
+    selectedSido.value = ''
+  }
+
+  await updateSggList()
   selectedSgg.value = result.code.slice(0, 5)
-  await updateUmd()
+  if (sggList.value.every((item) => item.code.slice(0, 5) !== selectedSgg.value.slice(0, 5))) {
+    selectedSgg.value = ''
+  }
+
+  await updateUmdList()
   selectedUmd.value = result.code.slice(0, 10)
+  if (umdList.value.every((item) => item.code.slice(0, 10) !== selectedUmd.value.slice(0, 10))) {
+    selectedUmd.value = ''
+  }
 }
 
 const setBjdFilterToMapCenter = async () => {
   const center = map.value.getCenter()
-  setBjdFilter({ coords: { latitude: center.getLat(), longitude: center.getLng() } })
+  setBjdFilter(center.getLat(), center.getLng())
 }
 
 /* 현재 위치로 이동 */
@@ -284,18 +305,16 @@ const aptNm = ref('')
 const apartments = ref([])
 
 const searchByKeyword = async () => {
-  console.log('검색어:', aptNm.value)
   const result = await axios.get('/api/apartments/apt', {
     params: {
       aptNm: aptNm.value,
     },
   })
-  console.log('검색 결과', result.data)
   apartments.value = result.data
 }
 
 onMounted(async () => {
-  updateSido()
+  updateSidoList()
 
   await loadKakaoMapScript()
 
@@ -450,7 +469,7 @@ const toggleSidebar = () => {
 
   padding: 8px;
   margin: 8px 0;
-  gap: 4px;
+  /* gap: 4px; */
 }
 .house-map__selete_current_position_button {
   margin: 0;
@@ -470,7 +489,7 @@ const toggleSidebar = () => {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 6px;
+  /* gap: 6px; */
 }
 
 .house-map__search-selectBox {
