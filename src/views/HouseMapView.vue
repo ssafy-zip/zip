@@ -49,19 +49,40 @@
         <!--검색 필터-->
         <article class="house-map__search-filters">
           <div class="house-map__search-filter-header">
+            <!--현재 지도 위치로 초기화-->
+            <div>
+              <button
+                class="house-map__selete_current_position_button"
+                @click="setBjdFilterToMapCenter"
+              >
+                <i class="fas fa-crosshairs"></i>
+              </button>
+            </div>
             <div class="house-map__search-filter-wrapper">
-              <select class="house-map__search-selectBox" v-model="selectedSido">
+              <select
+                class="house-map__search-selectBox"
+                v-model="selectedSido"
+                @change="updateSgg"
+              >
                 <option value="" disabled selected>시/도</option>
-                <option :value="sidoItem.code" v-for="sidoItem in sidoList" :key="sidoItem.code">
+                <option
+                  :value="sidoItem.code.slice(0, 2)"
+                  v-for="sidoItem in sidoList"
+                  :key="sidoItem.code"
+                >
                   {{ sidoItem.sidoName }}
                 </option>
               </select>
 
               <i class="fas fa-chevron-right"></i>
 
-              <select class="house-map__search-selectBox" v-model="selectedSgg">
+              <select class="house-map__search-selectBox" v-model="selectedSgg" @change="updateUmd">
                 <option value="" disabled selected>시/군/구</option>
-                <option :value="sggItem.code" v-for="sggItem in sggList" :key="sggItem.code">
+                <option
+                  :value="sggItem.code.slice(0, 5)"
+                  v-for="sggItem in sggList"
+                  :key="sggItem.code"
+                >
                   {{ sggItem.sggName }}
                 </option>
               </select>
@@ -113,17 +134,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
-const favorited = ref(true)
-
-const openSidebar = ref(false)
-
-const mapContainer = ref(null)
-const map = ref(null)
-const isMapLoaded = computed(() => map.value)
-
+/* === 법정동 조회 === */
 const sidoList = ref([])
 const sggList = ref([])
 const umdList = ref([])
@@ -132,21 +146,23 @@ const selectedSido = ref('')
 const selectedSgg = ref('')
 const selectedUmd = ref('')
 
-// 시도 조회
+// 법정동 목록 갱신
+// 시/도
 const updateSido = async () => {
   const response = await axios.get(`/api/lwdCd/sido`)
   sidoList.value = response.data
 }
-// 시군구 조회
+// 시/군/구
 const updateSgg = async () => {
   if (selectedSido.value) {
     const response = await axios.get(`/api/lwdCd/sgg/${selectedSido.value.slice(0, 2)}`)
     sggList.value = response.data
   }
   selectedSgg.value = ''
+  selectedUmd.value = ''
 }
 
-// 읍면동 조회
+// 읍/면/동
 const updateUmd = async () => {
   if (selectedSgg.value) {
     const response = await axios.get(`/api/lwdCd/umd/${selectedSgg.value.slice(0, 5)}`)
@@ -155,26 +171,11 @@ const updateUmd = async () => {
   selectedUmd.value = ''
 }
 
-// 시도 선택
-watch(
-  () => selectedSido.value,
-  () => {
-    updateSgg()
-    updateUmd()
-  },
-)
-// 시군구 선택
-watch(
-  () => selectedSgg.value,
-  () => {
-    updateUmd()
-  },
-)
-// 읍면동 선택
-// watch(
-//   () => selectedUmd,
-//   () => {},
-// )
+/* === Kakao Map === */
+const mapContainer = ref(null)
+const map = ref(null)
+const isMapLoaded = computed(() => map.value)
+const favorited = ref(true)
 
 // Kakao 지도 스크립트 로드
 const loadKakaoMapScript = async () => {
@@ -183,7 +184,7 @@ const loadKakaoMapScript = async () => {
       resolve() // 이미 로드됨
     } else {
       const script = document.createElement('script')
-      script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_JS_KEY}&autoload=false`
+      script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_JS_KEY}&autoload=false&libraries=services`
       script.async = true
       script.onload = () => {
         window.kakao.maps.load(() => {
@@ -194,18 +195,53 @@ const loadKakaoMapScript = async () => {
     }
   })
 }
-/* 현재 위치 조회 */
-const getCurrentPosition = async () => {
+/* 기기의 현재 위경도 조회 */
+const getCurrentDevicePosition = async () => {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) reject()
     navigator.geolocation.getCurrentPosition(resolve, reject)
   })
 }
 
+/* 위경도를 법정동 주소로 변환 */
+const coord2RegionCode = async (lat, lng) => {
+  const coord = new window.kakao.maps.LatLng(lat, lng)
+  const geocoder = new window.kakao.maps.services.Geocoder()
+
+  return new Promise((resolve, reject) => {
+    geocoder.coord2RegionCode(coord.getLng(), coord.getLat(), (result, status) => {
+      if (status === window.kakao.maps.services.Status.OK) {
+        const region = result.find((r) => r.region_type === 'B')
+        if (region) resolve(region)
+        else reject(new Error('No region with type "B" found'))
+      } else {
+        reject(new Error('Geocoder failed: ' + status))
+      }
+    })
+  })
+}
+
+/* 법정동 필터를 인자로 전달한 위치로 갱신 */
+const setBjdFilter = async (position) => {
+  const result = await coord2RegionCode(position.coords.latitude, position.coords.longitude)
+
+  selectedSido.value = result.code.slice(0, 2)
+  await updateSgg()
+  selectedSgg.value = result.code.slice(0, 5)
+  await updateUmd()
+  selectedUmd.value = result.code.slice(0, 10)
+}
+
+const setBjdFilterToMapCenter = async () => {
+  const center = map.value.getCenter()
+  setBjdFilter({ coords: { latitude: center.getLat(), longitude: center.getLng() } })
+}
+
+/* 현재 위치로 이동 */
 const moveToCurrentLocation = async () => {
   const MAX_LEVEL = 5
   try {
-    const position = await getCurrentPosition()
+    const position = await getCurrentDevicePosition()
     const { latitude, longitude } = position.coords
 
     const targetLatLng = new window.kakao.maps.LatLng(latitude, longitude)
@@ -233,7 +269,7 @@ onMounted(async () => {
 
   const options = { level: 5 }
   try {
-    const position = await getCurrentPosition()
+    const position = await getCurrentDevicePosition()
     const { latitude, longitude } = position.coords
     options.center = new window.kakao.maps.LatLng(latitude, longitude)
   } catch {
@@ -249,7 +285,9 @@ onMounted(async () => {
   map.value.addControl(zoomControl, window.kakao.maps.ControlPosition.RIGHT)
 })
 
-/* 사이드바 제어 */
+/* === 사이드바 제어 === */
+const openSidebar = ref(false)
+
 const toggleSidebar = () => {
   openSidebar.value = !openSidebar.value
 }
@@ -380,7 +418,20 @@ const toggleSidebar = () => {
 
   padding: 8px;
   margin: 8px 0;
-  gap: 12px;
+  gap: 4px;
+}
+.house-map__selete_current_position_button {
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 2px solid #cccccc;
+  border-radius: 8px;
+  padding: 2px;
+  cursor: pointer;
+  font-size: 20px;
+}
+.house-map__selete_current_position_button:hover {
+  background-color: #e5e7eb;
 }
 
 .house-map__search-filter-wrapper {
