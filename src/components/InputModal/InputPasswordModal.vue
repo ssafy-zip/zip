@@ -21,7 +21,10 @@
         class="modal__input"
         required
       />
-      <button type="submit" class="modal__submit" :disabled="!isValid">확인</button>
+      <button type="submit" class="modal__submit" :disabled="!isValid || isLoading">
+        {{ isLoading ? '변경 중…' : '확인' }}
+      </button>
+      <p v-if="error" class="modal__error">{{ error }}</p>
     </form>
   </InputModal>
 </template>
@@ -38,30 +41,42 @@ const emit = defineEmits(['submit', 'close'])
 
 const password = ref('')
 const passwordConfirm = ref('')
+const isLoading = ref(false)
 const error = ref('')
+
 const isValid = computed(() => {
-  return 6 <= password.value.length && password.value === passwordConfirm.value
+  return password.value.length >= 6 && password.value === passwordConfirm.value
 })
 
 const close = () => emit('close')
 
-// 제출 시 API 호출
 const submit = async () => {
+  error.value = ''
   if (!isValid.value) {
     error.value = '비밀번호가 일치하지 않거나 6자 미만입니다.'
     return
   }
+
+  isLoading.value = true
   try {
     const token = localStorage.getItem('authToken')
-    // updatePassword API 호출 (/api/users/updatePassword)
-    await axios.post('/api/users/updatePassword', password.value, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    emit('updated')
+    await axios.post(
+      '/api/users/updatePassword',
+      { newPassword: password.value }, // <-- DTO 형태로 보냅니다
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    )
+    emit('submit') // 부모에게 완료 알림
     close()
   } catch (err) {
     console.error('비밀번호 변경 실패', err)
-    error.value = '변경에 실패했습니다. 다시 시도해주세요.'
+    error.value = err.response?.data || '변경에 실패했습니다. 다시 시도해주세요.'
+  } finally {
+    isLoading.value = false
   }
 }
 </script>

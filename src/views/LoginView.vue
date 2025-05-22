@@ -85,7 +85,7 @@
       <div class="login-links">
         <router-link to="/findId">아이디 찾기</router-link>
         <span>|</span>
-        <router-link to="/findPassword">비밀번호 찾기</router-link>
+        <router-link to="/findPassword">비밀번호 재설정</router-link>
         <span>|</span>
         <router-link to="/join">회원가입</router-link>
       </div>
@@ -96,7 +96,8 @@
 <script setup>
 import { ref, onMounted, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+// import axios from 'axios'
+import baseURL from '@/baseURL'
 
 defineOptions({ name: 'LoginView' })
 
@@ -123,7 +124,7 @@ async function handleSubmit() {
 
   try {
     // 1) 로그인 API 호출
-    const { data } = await axios.post('/api/users/login', {
+    const { data } = await baseURL.post('/api/users/login', {
       userId: username.value,
       password: password.value,
     })
@@ -135,7 +136,6 @@ async function handleSubmit() {
     // 3) 로컬스토리지에 토큰·롤·서버 userId 저장
     localStorage.setItem('authToken', token)
     localStorage.setItem('userRole', role)
-    // → 이 키는 채팅 API 등에 항상 필요하니까 지우지 마세요!
     localStorage.setItem('savedUserId', serverUserId)
 
     // 4) “아이디 저장” 체크박스는 별도의 키로
