@@ -55,9 +55,19 @@ const summaryItems = computed(() => {
 })
 
 onMounted(async () => {
+  loading.value = true
+  error.value = ''
+
   try {
-    const response = await axios.get('/api/chat/newsSummation')
-    summary.value = response.data.summary
+    const today = new Date().toISOString().slice(0, 10)
+
+    const response = await axios.get('/api/news/getTodayNewsSummation', {
+      params: { date: today },
+    })
+
+    // 컨트롤러에서 String을 바로 리턴하면 response.data,
+    // DTO로 { summary: "..." } 형태를 리턴하면 response.data.summary
+    summary.value = response.data.summary ?? response.data
   } catch (e) {
     console.error('뉴스 요약 로드 실패', e)
     error.value = '데이터를 가져오는 중 문제가 발생했습니다.'
