@@ -9,6 +9,8 @@ import com.ssafy.BaeAndChoi.user.dto.UserUpdateRequestDTO;
 import com.ssafy.BaeAndChoi.user.enums.Role;
 import com.ssafy.BaeAndChoi.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -72,6 +74,32 @@ public class UserService {
                 .orElseThrow(() -> new BadRequestException("User does not exist"));
 
         user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
         return "success update password";
+    }
+
+    public String findUserIdByEmail(@NotBlank String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("User does not exist"));
+
+        return user.getUserId();
+    }
+
+    public boolean checkExchangable(@NotBlank String userId, @Email @NotBlank String email) {
+        User user = userRepository.findUserByUserIdAndEmail(userId,email)
+                .orElseThrow(() -> new BadRequestException("회원가입 시 사용한 정보를 정확히 입력해주세요"));
+
+        return true;
+    }
+
+    @Transactional
+    public String resetPassword(String userId, String password){
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequestException("회원가입 시 사용한 정보를 정확히 입력해주세요"));
+
+        user.setPassword(passwordEncoder.encode(password));
+        userRepository.save(user);
+
+        return "success";
     }
 }

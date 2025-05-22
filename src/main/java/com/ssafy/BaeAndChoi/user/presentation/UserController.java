@@ -1,6 +1,9 @@
 package com.ssafy.BaeAndChoi.user.presentation;
 
 import com.ssafy.BaeAndChoi.config.util.JwtUtil;
+import com.ssafy.BaeAndChoi.email.application.EmailService;
+import com.ssafy.BaeAndChoi.email.domain.FindIdRequest;
+import com.ssafy.BaeAndChoi.exception.BadRequestException;
 import com.ssafy.BaeAndChoi.user.application.UserService;
 import com.ssafy.BaeAndChoi.user.domain.User;
 import com.ssafy.BaeAndChoi.user.dto.*;
@@ -11,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticatedPrincipal;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +29,7 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final EmailService emailService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
@@ -84,9 +87,37 @@ public class UserController {
     }
 
     @PostMapping("updatePassword")
-    public ResponseEntity<String> updatePassword(@RequestBody String newPassword,@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<String> updatePassword(@RequestBody PasswordUpdateRequestDTO dto,@AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
         log.info("비밀번호 변경 진행");
-        return ResponseEntity.ok(userService.updatePassword(userId,newPassword));
+        return ResponseEntity.ok(userService.updatePassword(userId,dto.getNewPassword()));
+    }
+
+    /**
+     * 이메일로 아이디를 전송하는 엔드포인트
+     */
+    @PostMapping("/find-id")
+    public ResponseEntity<?> findId(@RequestBody FindIdRequest dto) {
+        String userId = userService.findUserIdByEmail(dto.getEmail());
+        if (userId == null) {
+            throw new BadRequestException("등록된 아이디가 없습니다.");
+        }
+
+        // HTML 이메일 보내기
+        emailService.sendFindIdHtmlEmail(dto.getEmail(), userId);
+
+        return ResponseEntity.ok(Map.of("message", "회원가입시 사용하신 이메일로 아이디를 발송했습니다."));
+    }
+
+    @PostMapping("/canExchangePassword")
+    public ResponseEntity<String> canExchangePassword(@RequestBody ExchangablePasswordRequestDTO dto) {
+        boolean exchangable = userService.checkExchangable(dto.getUserId(),dto.getEmail());
+
+        return ResponseEntity.ok(exchangable ? "true" : "false");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestParam String userId, @RequestBody ResetPasswordRequestDTO dto){
+        return ResponseEntity.ok(userService.resetPassword(userId,dto.getPassword()));
     }
 }
