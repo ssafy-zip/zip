@@ -8,6 +8,8 @@ import com.ssafy.BaeAndChoi.board.repository.BoardRepository;
 import com.ssafy.BaeAndChoi.board.repository.CommentRepository;
 import com.ssafy.BaeAndChoi.exception.BadRequestException;
 import com.ssafy.BaeAndChoi.user.domain.User;
+import com.ssafy.BaeAndChoi.user.dto.CategoryArticlesDto;
+import com.ssafy.BaeAndChoi.user.dto.MyArticleDto;
 import com.ssafy.BaeAndChoi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +21,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.LinkedHashMap;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -251,5 +257,40 @@ public class BoardService{
                 .content(comment.getContent())
                 .createdAt(comment.getCreatedAt())
                 .build();
+    }
+    /**
+     * 카테고리별로 내가 쓴 게시글 최신 5개씩 반환
+     */
+    @Transactional(readOnly = true)
+    public List<CategoryArticlesDto> findMyArticlesByCategory(String userId) {
+        // 1) User 조회
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("사용자 정보 없음"));
+
+        // 2) 내가 쓴 글 전체를 최신순으로 조회
+        List<Board> allMyBoards = boardRepository
+                .findByWriter_IdOrderByCreatedAtDesc(user.getId());
+
+        // 3) DTO로 변환 & 카테고리별 그룹화
+        Map<PostType, List<MyArticleDto>> grouped = allMyBoards.stream()
+                .map(MyArticleDto::from)
+                .collect(Collectors.groupingBy(
+                        MyArticleDto::getCategory,
+                        LinkedHashMap::new,    // Optional: 입력 순서 유지
+                        Collectors.toList()
+                ));
+
+        // 4) 그룹별로 최대 5개씩 잘라서 CategoryArticlesDto 생성
+        return grouped.entrySet().stream()
+                .map(entry -> CategoryArticlesDto.builder()
+                        .category(entry.getKey())
+                        .articles(
+                                entry.getValue().stream()
+                                        .limit(5)
+                                        .collect(Collectors.toList())
+                        )
+                        .build()
+                )
+                .collect(Collectors.toList());
     }
 }
