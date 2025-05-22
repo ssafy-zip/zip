@@ -1,5 +1,6 @@
 package com.ssafy.BaeAndChoi.interest.domain;
 
+import com.ssafy.BaeAndChoi.lwdCd.domain.LwdCd;
 import com.ssafy.BaeAndChoi.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;

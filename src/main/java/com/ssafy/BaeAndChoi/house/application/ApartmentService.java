@@ -213,4 +213,11 @@ public class ApartmentService {
         // 거래 내역 조회
         return apartmentDealRepository.findAllByApartment(apartment);
     }
+
+    /**
+     * 아파트명을 기반으로 아파트 정보 반환
+     */
+    public List<Apartment> findAptByApartmentName(String aptNm){
+        return apartmentRepository.findApartmentByAptNmContaining(aptNm);
+    }
 }

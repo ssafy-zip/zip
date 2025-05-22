@@ -1,6 +1,7 @@
 package com.ssafy.BaeAndChoi.house.presentation;
 
 import com.ssafy.BaeAndChoi.house.application.ApartmentService;
+import com.ssafy.BaeAndChoi.house.domain.Apartment;
 import com.ssafy.BaeAndChoi.house.domain.ApartmentDeal;
 import com.ssafy.BaeAndChoi.house.domain.AptTradeBasicData;
 import lombok.RequiredArgsConstructor;
@@ -39,5 +40,11 @@ public class ApartmentController {
     public ResponseEntity<List<ApartmentDeal>> selectApartmentDeal(@RequestParam String aptNm){
         List<ApartmentDeal> apartmentDealList = apartmentService.findDealsByApartmentName(aptNm);
         return ResponseEntity.ok(apartmentDealList);
+    }
+
+    @GetMapping("/apt")
+    public ResponseEntity<List<Apartment>> selectApartment(@RequestParam String aptNm){
+        List<Apartment> apartmentList = apartmentService.findAptByApartmentName(aptNm);
+        return ResponseEntity.ok(apartmentList);
     }
 }
