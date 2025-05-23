@@ -36,7 +36,7 @@
       <section class="house_map__search">
         <article class="house-map__sidebar-search-box">
           <div class="house-map__search-input-wrapper">
-            <button class="house-map__search-button" @click="searchByKeyword">
+            <button class="house-map__search-button" @click="searchApt">
               <i class="fas fa-search"></i>
             </button>
             <input
@@ -44,7 +44,7 @@
               placeholder="검색"
               class="house-map__search-keyword"
               v-model="aptNm"
-              @keydown.enter="searchByKeyword"
+              @keydown.enter="searchApt"
             />
           </div>
         </article>
@@ -104,6 +104,7 @@
       <section class="house-map__sidebar-thread">
         <div class="house-map__sidebar-thread-container">
           <div class="house-map__apt-info" v-for="item in apartments" :key="item.aptSeq">
+            <div>{{ item.aptSeq }}</div>
             <div class="house-map__apt-info-title">{{ item.aptNm }}</div>
             <ul class="house-map__apt-info-detail">
               <li>
@@ -294,9 +295,14 @@ async function moveToCurrentLocation() {
 // 아파트 검색
 const aptNm = ref('')
 const apartments = ref([])
-async function searchByKeyword() {
+async function searchApt() {
   try {
-    const { data } = await axios.get('/api/apartments/apt', { params: { aptNm: aptNm.value } })
+    const { data } = await axios.get('/api/apartments/apt', {
+      params: {
+        aptNm: aptNm.value,
+        code: selectedUmd.value,
+      },
+    })
     apartments.value = data
   } catch {
     console.error('아파트 검색 실패')
