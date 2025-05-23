@@ -221,4 +221,8 @@ public class ApartmentService {
     public List<Apartment> searchApartments(SearchOption searchOption) {
         return apartmentRepository.searchApartments(searchOption);
     }
+
+    public Apartment getApartmentByAptSeq(String aptSeq) {
+        return apartmentRepository.findApartmentByAptSeq(aptSeq).orElseThrow(() -> new EntityNotFoundException("Apartment not found: " + aptSeq));
+    }
 }

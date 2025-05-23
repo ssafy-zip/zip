@@ -10,4 +10,5 @@ public interface ApartmentRepository extends JpaRepository<Apartment, Integer>, 
     Optional<Apartment> findApartmentByAptNm(String aptName);
     Optional<Apartment> findApartmentByAptNmAndSggCdAndUmdCd(String aptName, String sggCd, String umdCd);
     List<Apartment> findApartmentByAptNmContaining(String aptName);
+    Optional<Apartment> findApartmentByAptSeq(String aptSeq);
 }

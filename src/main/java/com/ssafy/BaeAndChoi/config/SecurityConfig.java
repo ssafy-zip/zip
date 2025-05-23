@@ -60,7 +60,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/boards/**/comments","/api/interestRegion").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/boards/**/comments/**").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/boards/**","/api/interestRegion/**").authenticated()
-                        .requestMatchers(HttpMethod.GET,"/api/interestRegion/**").authenticated()
+                        .requestMatchers(HttpMethod.GET,"/api/interestRegion/**","/api/interestHouse/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .authenticationManager(authenticationManager(http))
@@ -75,7 +75,7 @@ public class SecurityConfig {
         AuthenticationManagerBuilder authBuilder =
                 http.getSharedObject(AuthenticationManagerBuilder.class);
         authBuilder
-                .userDetailsService(customUserDetailsService)   // 여기서 customUserDetailsService 사용
+                .userDetailsService(customUserDetailsService)
                 .passwordEncoder(passwordEncoder());
         return authBuilder.build();
     }
