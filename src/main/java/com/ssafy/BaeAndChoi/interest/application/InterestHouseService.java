@@ -70,10 +70,17 @@ public class InterestHouseService {
      * @param gu     동(구) 코드 (umdCd), null일 경우 전체
      * @return 필터된 관심 아파트 목록
      */
-    public List<Apartment> getInterestApartments(String userId, String si, String gun, String gu) {
-        return interestHouseRepository.findInterestHousesByUserAndRegion(userId, si, gun, gu)
+    public List<Apartment> getInterestApartments(String userId,String aptName, String si, String gun, String gu) {
+        return interestHouseRepository.findInterestHousesByUserAndRegion(userId, aptName, si, gun, gu)
                 .stream()
                 .map(InterestHouse::getApartment)
                 .collect(Collectors.toList());
+    }
+
+    public String isInterestApartment(String userId, String aptSeq) {
+        User user = userService.getUser(userId);
+        Apartment apartment = apartmentService.getApartmentByAptSeq(aptSeq);
+
+        return interestHouseRepository.existsByUserAndApartment(user, apartment) ? "true" : "false";
     }
 }

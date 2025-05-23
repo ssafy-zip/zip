@@ -13,7 +13,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -42,11 +44,24 @@ public class InterestHouseController {
     }
 
     @GetMapping("/interestHouses")
-    public ResponseEntity<List<Apartment>> getInterestHouses(@AuthenticationPrincipal UserDetails userDetails, @RequestParam(required = false) String si,
+    public ResponseEntity<List<Apartment>> getInterestHouses(@AuthenticationPrincipal UserDetails userDetails, @RequestParam(required = false) String aptName, @RequestParam(required = false) String si,
                                                                 @RequestParam(required = false) String gun,
                                                                 @RequestParam(required = false) String gu) {
+        if(userDetails == null){
+            return ResponseEntity.ok((Collections.emptyList()));
+        }
         String userId = userDetails.getUsername();
 
-        return ResponseEntity.ok(interestHouseService.getInterestApartments(userId, si, gun, gu));
+        return ResponseEntity.ok(interestHouseService.getInterestApartments(userId, aptName, si, gun, gu));
+    }
+
+    @GetMapping("/isInterestHouses")
+    public ResponseEntity<String> checkIsInterestHouses(@AuthenticationPrincipal UserDetails userDetails, @RequestParam String aptSeq) {
+        if(userDetails == null){
+            return ResponseEntity.ok("false");
+        }
+
+        String userId = userDetails.getUsername();
+        return ResponseEntity.ok(interestHouseService.isInterestApartment(userId,aptSeq));
     }
 }
