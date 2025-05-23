@@ -11,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -29,6 +30,10 @@ public class InterestRegionContoller {
 
     @GetMapping("/interestRegions")
     public ResponseEntity<List<InterestRegionResponseDTO>> getInterestRegions(@AuthenticationPrincipal UserDetails userDetails) {
+        if(userDetails == null){
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+
         String userId = userDetails.getUsername();
         return ResponseEntity.ok(interestRegionService.getAllInterestRegion(userId));
     }
@@ -42,7 +47,12 @@ public class InterestRegionContoller {
 
     @GetMapping("/isInterestRegion")
     public ResponseEntity<String> isInterestRegion(@AuthenticationPrincipal UserDetails userDetails, String lwdCd) {
+        if(userDetails == null){
+            return ResponseEntity.ok("false");
+        }
+
         String userId = userDetails.getUsername();
+
         return ResponseEntity.ok(interestRegionService.isInterestRegionExist(userId,lwdCd));
     }
 }
