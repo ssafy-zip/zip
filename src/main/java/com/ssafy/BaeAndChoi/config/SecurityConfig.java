@@ -48,10 +48,7 @@ public class SecurityConfig {
                         .ignoringRequestMatchers("/api/**"))
                 .formLogin(formLogin -> formLogin.disable()) // 폼 로그인 비활성화
                 .httpBasic(httpBasic -> httpBasic.disable()) // HTTP Basic 인증 비활성화
-//                .exceptionHandling(exceptionHandling ->
-//                        exceptionHandling.authenticationEntryPoint(new RestAuthenticationEntryPoint())) // 예외 처리 설정
                 .authorizeHttpRequests(auth -> auth
-                        // swagger, static
                         .requestMatchers(
                                 "/swagger-ui/**","/v3/api-docs/**","/swagger-ui.html",
                                 "/error","/favicon.ico","/**/*.css","/**/*.js",
@@ -60,9 +57,10 @@ public class SecurityConfig {
                         ).permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/users/**","/api/users/login").permitAll()
                                 .requestMatchers(HttpMethod.GET,  "/api/boards/**","/api/chat/**","/api/users/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/boards/**/comments").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/boards/**/comments","/api/interestRegion").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/boards/**/comments/**").authenticated()
-                                .requestMatchers(HttpMethod.DELETE, "/api/boards/**").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/boards/**","/api/interestRegion/**").authenticated()
+                        .requestMatchers(HttpMethod.GET,"/api/interestRegion/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .authenticationManager(authenticationManager(http))

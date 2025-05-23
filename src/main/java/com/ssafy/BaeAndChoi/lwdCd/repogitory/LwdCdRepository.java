@@ -6,6 +6,7 @@ import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface LwdCdRepository extends Repository<LwdCd, String> {
 
@@ -36,4 +37,6 @@ public interface LwdCdRepository extends Repository<LwdCd, String> {
             AND umdName IS NOT NULL
             """)
     List<LwdCd> findUmdListBySggCode(@Param("sggCode") String sggCode);
+
+    Optional<LwdCd> findLwdCdByCode(String code);
 }
