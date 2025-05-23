@@ -1,5 +1,6 @@
 <template>
   <section class="house-map">
+    <!-- 사이드바 네비게이션 -->
     <nav class="house-map__sidebar-nav">
       <ul class="house-map__sidebar-nav-list">
         <li class="house-map__sidebar-nav-item" @click="toggleSidebar">
@@ -10,22 +11,18 @@
           <i class="fa-solid fa-crosshairs fa-2x"></i>
           <span>내 위치</span>
         </li>
-        <!--매물 검색 및 조회-->
         <li class="house-map__sidebar-nav-item">
           <i class="fa-solid fa-search fa-2x"></i>
           <span>검색</span>
         </li>
-        <!--관심 지역, 매물 목록-->
         <li class="house-map__sidebar-nav-item">
           <i class="fa-solid fa-heart fa-2x"></i>
           <span>관심</span>
         </li>
-        <!--챗봇-->
         <li class="house-map__sidebar-nav-item">
           <i class="fa-solid fa-robot fa-2x"></i>
           <span>AI 검색</span>
         </li>
-        <!--기타-->
         <li class="house-map__sidebar-nav-item">
           <i class="fa-solid fa-ellipsis-h fa-2x"></i>
           <span>더보기</span>
@@ -35,9 +32,8 @@
 
     <!-- 사이드바 -->
     <section :class="['house-map__sidebar', { closed: !openSidebar }]">
-      <!--헤더: 검색-->
+      <!-- 검색 헤더 -->
       <section class="house_map__search">
-        <!--검색 상자-->
         <article class="house-map__sidebar-search-box">
           <div class="house-map__search-input-wrapper">
             <button class="house-map__search-button" @click="searchByKeyword">
@@ -52,33 +48,27 @@
             />
           </div>
         </article>
-        <!--검색 필터-->
+
+        <!-- 검색 필터 및 관심지역 ★ -->
         <article class="house-map__search-filters">
           <div class="house-map__search-filter-header">
-            <!--현재 지도 위치로 초기화-->
             <button
               class="house-map__selete_current_position_button"
               @click="setBjdFilterToMapCenter"
             >
               <i class="fas fa-crosshairs"></i>
             </button>
-
             <div class="house-map__search-filter-wrapper">
               <select
                 class="house-map__search-selectBox"
                 v-model="selectedSido"
                 @change="updateSggList"
               >
-                <option value="" disabled selected>시/도</option>
-                <option
-                  :value="sidoItem.code.slice(0, 2)"
-                  v-for="sidoItem in sidoList"
-                  :key="sidoItem.code"
-                >
-                  {{ sidoItem.sidoName }}
+                <option value="" disabled>시/도</option>
+                <option v-for="s in sidoList" :key="s.code" :value="s.code.slice(0, 2)">
+                  {{ s.sidoName }}
                 </option>
               </select>
-
               <i class="fas fa-chevron-right"></i>
 
               <select
@@ -86,30 +76,31 @@
                 v-model="selectedSgg"
                 @change="updateUmdList"
               >
-                <option value="" disabled selected>시/군/구</option>
-                <option
-                  :value="sggItem.code.slice(0, 5)"
-                  v-for="sggItem in sggList"
-                  :key="sggItem.code"
-                >
-                  {{ sggItem.sggName }}
+                <option value="" disabled>시/군/구</option>
+                <option v-for="g in sggList" :key="g.code" :value="g.code.slice(0, 5)">
+                  {{ g.sggName }}
                 </option>
               </select>
-
               <i class="fas fa-chevron-right"></i>
 
               <select class="house-map__search-selectBox" v-model="selectedUmd">
-                <option value="" disabled selected>읍/면/동</option>
-                <option :value="umdItem.code" v-for="umdItem in umdList" :key="umdItem.code">
-                  {{ umdItem.umdName }}
-                </option>
+                <option value="" disabled>읍/면/동</option>
+                <option v-for="u in umdList" :key="u.code" :value="u.code">{{ u.umdName }}</option>
               </select>
+
+              <!-- 관심지역 토글 버튼 -->
+              <button class="breadcrumb-star-btn" @click="toggleStar">
+                <i
+                  class="fa-solid fa-star"
+                  :style="{ color: isStarred ? '#fbbf24' : '#cbd5e1' }"
+                ></i>
+              </button>
             </div>
           </div>
         </article>
       </section>
 
-      <!-- 콘텐츠: 검색된 아파트 목록 -->
+      <!-- 아파트 검색 결과 -->
       <section class="house-map__sidebar-thread">
         <div class="house-map__sidebar-thread-container">
           <div class="house-map__apt-info" v-for="item in apartments" :key="item.aptSeq">
@@ -117,231 +108,221 @@
             <ul class="house-map__apt-info-detail">
               <li>
                 <span>{{
-                  Math.min(...item.deals.map((deal) => Number(deal.dealAmount.replace(/,/g, ''))))
+                  Math.min(...item.deals.map((d) => +d.dealAmount.replace(/,/g, '')))
                 }}</span>
                 -
                 <span>{{
-                  Math.max(...item.deals.map((deal) => Number(deal.dealAmount.replace(/,/g, ''))))
+                  Math.max(...item.deals.map((d) => +d.dealAmount.replace(/,/g, '')))
                 }}</span>
                 만원
               </li>
               <li>
-                <span>{{ Math.min(...item.deals.map((deal) => Number(deal.excluUseAr))) }}</span>
-                -
-                <span>{{ Math.max(...item.deals.map((deal) => Number(deal.excluUseAr))) }}</span>
-                ㎡
+                <span>{{ Math.min(...item.deals.map((d) => +d.excluUseAr)) }}</span> -
+                <span>{{ Math.max(...item.deals.map((d) => +d.excluUseAr)) }}</span> ㎡
               </li>
               <li>
                 거래 이력 수: <span>{{ item.deals.length }}</span>
               </li>
             </ul>
-            <button class="house-map__apt-info-favorite" :class="{ favorited }">
-              <i v-if="favorited" class="fas fa-star"></i>
-              <i v-else class="far fa-star"></i>
+            <button class="house-map__apt-info-favorite">
+              <i class="fas fa-star"></i>
             </button>
           </div>
         </div>
       </section>
     </section>
 
-    <!-- 지도 영역 -->
+    <!-- 카카오 맵 -->
     <section class="house-map__map-container" ref="mapContainer">
-      <div v-if="!isMapLoaded" class="house-map__map-placeholder faild">
-        지도를 로드할 수 없습니다.<br />
-        나중에 다시 시도해 주세요.
+      <div v-if="!isMapLoaded" class="house-map__map-placeholder">
+        지도를 로드할 수 없습니다.<br />나중에 다시 시도해 주세요.
       </div>
     </section>
   </section>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 
-/* === 법정동 조회 === */
-// 법정동 목록
+// JWT 토큰 설정
+const token = localStorage.getItem('authToken')
+if (token) axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+
+// 법정동 목록 상태
 const sidoList = ref([])
 const sggList = ref([])
 const umdList = ref([])
-// 선택된 법정동
 const selectedSido = ref('')
 const selectedSgg = ref('')
 const selectedUmd = ref('')
 
-// 법정동 목록 갱신
-const updateSidoList = async () => {
-  const response = await axios.get(`/api/lwdCd/sido`)
-  sidoList.value = response.data
+// 관심지역 상태
+const isStarred = ref(false)
 
+// 법정동 목록 조회
+async function updateSidoList() {
+  const { data } = await axios.get('/api/lwdCd/sido')
+  sidoList.value = data
   selectedSido.value = ''
   selectedSgg.value = ''
   selectedUmd.value = ''
 }
-const updateSggList = async () => {
-  if (selectedSido.value) {
-    const response = await axios.get(`/api/lwdCd/sgg/${selectedSido.value.slice(0, 2)}`)
-    sggList.value = response.data
-  } else {
-    sggList.value = []
+async function updateSggList() {
+  if (!selectedSido.value) sggList.value = []
+  else {
+    const { data } = await axios.get(`/api/lwdCd/sgg/${selectedSido.value}`)
+    sggList.value = data
   }
-
   selectedSgg.value = ''
   selectedUmd.value = ''
 }
-const updateUmdList = async () => {
-  if (selectedSgg.value) {
-    const response = await axios.get(`/api/lwdCd/umd/${selectedSgg.value.slice(0, 5)}`)
-    umdList.value = response.data
-  } else {
-    umdList.value = []
+async function updateUmdList() {
+  if (!selectedSgg.value) umdList.value = []
+  else {
+    const { data } = await axios.get(`/api/lwdCd/umd/${selectedSgg.value}`)
+    umdList.value = data
   }
-
   selectedUmd.value = ''
 }
 
-/* === Kakao Map === */
+// 선택된 읍/면/동 변경 시 등록 여부 조회
+watch(
+  selectedUmd,
+  async (newCode) => {
+    if (!newCode) {
+      isStarred.value = false
+      return
+    }
+    try {
+      const { data } = await axios.get('/api/interestRegion/isInterestRegion', {
+        params: { lwdCd: newCode },
+      })
+      const clean = String(data).trim().replace(/^"|"$/g, '')
+      isStarred.value = clean.toLowerCase() === 'true'
+    } catch {
+      isStarred.value = false
+    }
+  },
+  { immediate: true },
+)
+
+// 관심지역 토글
+async function toggleStar() {
+  if (!token) return alert('로그인 해주세요.')
+  if (!selectedUmd.value) return
+  try {
+    if (isStarred.value) {
+      await axios.delete('/api/interestRegion', { params: { lwdCd: selectedUmd.value } })
+      isStarred.value = false
+    } else {
+      await axios.post('/api/interestRegion', { lwdCd: selectedUmd.value })
+      isStarred.value = true
+    }
+  } catch {
+    console.error('관심지역 업데이트 실패')
+  }
+}
+
+// 카카오맵 초기화
 const mapContainer = ref(null)
 const map = ref(null)
-const isMapLoaded = computed(() => map.value)
-const favorited = ref(true)
+const isMapLoaded = computed(() => !!map.value)
 
-// Kakao 지도 스크립트 로드
-const loadKakaoMapScript = async () => {
+async function loadKakaoMapScript() {
+  if (window.kakao) return
   return new Promise((resolve) => {
-    if (window.kakao && window.kakao.maps) {
-      resolve() // 이미 로드됨
-    } else {
-      const script = document.createElement('script')
-      script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_JS_KEY}&autoload=false&libraries=services`
-      script.async = true
-      script.onload = () => {
-        window.kakao.maps.load(() => {
-          resolve()
-        })
-      }
-      document.head.appendChild(script)
-    }
-  })
-}
-/* 기기의 현재 위경도 조회 */
-const getCurrentDevicePosition = async () => {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) reject()
-    navigator.geolocation.getCurrentPosition(resolve, reject)
+    const script = document.createElement('script')
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_JS_KEY}&autoload=false&libraries=services`
+    script.async = true
+    script.onload = () => window.kakao.maps.load(resolve)
+    document.head.appendChild(script)
   })
 }
 
-/* 위경도를 법정동 주소로 변환 */
-const coord2RegionCode = async (lat, lng) => {
-  const coord = new window.kakao.maps.LatLng(lat, lng)
-  const geocoder = new window.kakao.maps.services.Geocoder()
+function getCurrentDevicePosition() {
+  return new Promise((res, rej) =>
+    navigator.geolocation ? navigator.geolocation.getCurrentPosition(res, rej) : rej(),
+  )
+}
 
-  return new Promise((resolve, reject) => {
-    geocoder.coord2RegionCode(coord.getLng(), coord.getLat(), (result, status) => {
+function coord2RegionCode(lat, lng) {
+  return new Promise((res, rej) => {
+    const geocoder = new window.kakao.maps.services.Geocoder()
+    geocoder.coord2RegionCode(lng, lat, (result, status) => {
       if (status === window.kakao.maps.services.Status.OK) {
         const region = result.find((r) => r.region_type === 'B')
-        if (region) resolve(region)
-        else reject(new Error('No region with type "B" found'))
-      } else {
-        reject(new Error('Geocoder failed: ' + status))
+        return region ? res(region) : rej()
       }
+      rej()
     })
   })
 }
 
-/* 법정동 필터를 인자로 전달한 위치로 갱신 */
-const setBjdFilter = async (latitude, longitude) => {
-  const result = await coord2RegionCode(latitude, longitude)
-  selectedSido.value = result.code.slice(0, 2)
-  if (sidoList.value.every((item) => item.code.slice(0, 2) !== selectedSido.value.slice(0, 2))) {
-    selectedSido.value = ''
-  }
-
-  await updateSggList()
-  selectedSgg.value = result.code.slice(0, 5)
-  if (sggList.value.every((item) => item.code.slice(0, 5) !== selectedSgg.value.slice(0, 5))) {
-    selectedSgg.value = ''
-  }
-
-  await updateUmdList()
-  selectedUmd.value = result.code.slice(0, 10)
-  if (umdList.value.every((item) => item.code.slice(0, 10) !== selectedUmd.value.slice(0, 10))) {
-    selectedUmd.value = ''
-  }
-}
-
-const setBjdFilterToMapCenter = async () => {
+async function setBjdFilterToMapCenter() {
+  if (!map.value) return
   const center = map.value.getCenter()
-  setBjdFilter(center.getLat(), center.getLng())
+  await setBjdFilter(center.getLat(), center.getLng())
 }
 
-/* 현재 위치로 이동 */
-const moveToCurrentLocation = async () => {
-  const MAX_LEVEL = 5
-  try {
-    const position = await getCurrentDevicePosition()
-    const { latitude, longitude } = position.coords
+async function setBjdFilter(lat, lng) {
+  const region = await coord2RegionCode(lat, lng)
+  selectedSido.value = region.code.slice(0, 2)
+  await updateSggList()
+  selectedSgg.value = region.code.slice(0, 5)
+  await updateUmdList()
+  selectedUmd.value = region.code
+}
 
-    const targetLatLng = new window.kakao.maps.LatLng(latitude, longitude)
+async function moveToCurrentLocation() {
+  try {
+    const pos = await getCurrentDevicePosition()
+    const lat = pos.coords.latitude
+    const lng = pos.coords.longitude
+    await setBjdFilter(lat, lng)
     if (map.value) {
-      // 줌 아웃 상한
-      const currentLevel = map.value.getLevel()
-      if (currentLevel > MAX_LEVEL) {
-        map.value.setLevel(MAX_LEVEL)
-      }
-      // 현재 위치로 이동
-      map.value.panTo(targetLatLng)
-      const marker = new window.kakao.maps.Marker({ position: targetLatLng })
-      marker.setMap(map.value)
+      const loc = new window.kakao.maps.LatLng(lat, lng)
+      if (map.value.getLevel() > 5) map.value.setLevel(5)
+      map.value.panTo(loc)
+      new window.kakao.maps.Marker({ position: loc, map: map.value })
     }
-  } catch (error) {
-    alert('위치 정보를 가져오지 못했습니다.')
-    console.log(error)
+  } catch {
+    console.error('위치 이동 실패')
   }
 }
 
-/* */
+// 아파트 검색
 const aptNm = ref('')
 const apartments = ref([])
+async function searchByKeyword() {
+  try {
+    const { data } = await axios.get('/api/apartments/apt', { params: { aptNm: aptNm.value } })
+    apartments.value = data
+  } catch {
+    console.error('아파트 검색 실패')
+  }
+}
 
-const searchByKeyword = async () => {
-  const result = await axios.get('/api/apartments/apt', {
-    params: {
-      aptNm: aptNm.value,
-    },
-  })
-  apartments.value = result.data
+// 사이드바 토글
+const openSidebar = ref(false)
+function toggleSidebar() {
+  openSidebar.value = !openSidebar.value
 }
 
 onMounted(async () => {
-  updateSidoList()
-
+  await updateSidoList()
   await loadKakaoMapScript()
-
   const options = { level: 5 }
   try {
-    const position = await getCurrentDevicePosition()
-    const { latitude, longitude } = position.coords
-    options.center = new window.kakao.maps.LatLng(latitude, longitude)
+    const pos = await getCurrentDevicePosition()
+    options.center = new window.kakao.maps.LatLng(pos.coords.latitude, pos.coords.longitude)
   } catch {
-    options.center = new window.kakao.maps.LatLng(37.5665, 126.978) // 서울 시청
+    options.center = new window.kakao.maps.LatLng(37.5665, 126.978)
   }
-
   map.value = new window.kakao.maps.Map(mapContainer.value, options)
-
-  const marker = new window.kakao.maps.Marker({ position: options.center })
-  marker.setMap(map.value)
-
-  const zoomControl = new window.kakao.maps.ZoomControl()
-  map.value.addControl(zoomControl, window.kakao.maps.ControlPosition.RIGHT)
+  new window.kakao.maps.Marker({ position: options.center, map: map.value })
+  map.value.addControl(new window.kakao.maps.ZoomControl(), window.kakao.maps.ControlPosition.RIGHT)
 })
-
-/* === 사이드바 제어 === */
-const openSidebar = ref(false)
-
-const toggleSidebar = () => {
-  openSidebar.value = !openSidebar.value
-}
 </script>
 
 <style scoped>
@@ -469,7 +450,6 @@ const toggleSidebar = () => {
 
   padding: 8px;
   margin: 8px 0;
-  /* gap: 4px; */
 }
 .house-map__selete_current_position_button {
   margin: 0;
@@ -489,7 +469,6 @@ const toggleSidebar = () => {
   flex: 1;
   display: flex;
   align-items: center;
-  /* gap: 6px; */
 }
 
 .house-map__search-selectBox {
@@ -563,5 +542,21 @@ const toggleSidebar = () => {
   align-items: center;
   height: 100%;
   color: #374151;
+}
+
+/* 관심지역 ★ 스타일 */
+.breadcrumb-star-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 8px;
+}
+.breadcrumb-star-btn .fa-star {
+  font-size: 18px;
+  color: #cbd5e1;
+  transition: color 0.2s;
+}
+.breadcrumb-star-btn .fa-star.starred {
+  color: #fbbf24;
 }
 </style>
