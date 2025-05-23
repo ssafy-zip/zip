@@ -4,14 +4,12 @@ import com.ssafy.BaeAndChoi.house.application.ApartmentService;
 import com.ssafy.BaeAndChoi.house.domain.Apartment;
 import com.ssafy.BaeAndChoi.house.domain.ApartmentDeal;
 import com.ssafy.BaeAndChoi.house.domain.AptTradeBasicData;
+import com.ssafy.BaeAndChoi.house.domain.SearchOption;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -43,8 +41,8 @@ public class ApartmentController {
     }
 
     @GetMapping("/apt")
-    public ResponseEntity<List<Apartment>> selectApartment(@RequestParam String aptNm){
-        List<Apartment> apartmentList = apartmentService.findAptByApartmentName(aptNm);
+    public ResponseEntity<List<Apartment>> selectApartment(@ModelAttribute SearchOption searchOption){
+        List<Apartment> apartmentList = apartmentService.searchApartments(searchOption);
         return ResponseEntity.ok(apartmentList);
     }
 }

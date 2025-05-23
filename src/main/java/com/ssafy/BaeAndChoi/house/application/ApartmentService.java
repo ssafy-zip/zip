@@ -4,10 +4,7 @@ package com.ssafy.BaeAndChoi.house.application;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.ssafy.BaeAndChoi.house.domain.Apartment;
-import com.ssafy.BaeAndChoi.house.domain.ApartmentDeal;
-import com.ssafy.BaeAndChoi.house.domain.AptTradeBasicData;
-import com.ssafy.BaeAndChoi.house.domain.AptTradeResponse;
+import com.ssafy.BaeAndChoi.house.domain.*;
 import com.ssafy.BaeAndChoi.house.repository.ApartmentDealRepository;
 import com.ssafy.BaeAndChoi.house.repository.ApartmentRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -219,5 +216,9 @@ public class ApartmentService {
      */
     public List<Apartment> findAptByApartmentName(String aptNm){
         return apartmentRepository.findApartmentByAptNmContaining(aptNm);
+    }
+
+    public List<Apartment> searchApartments(SearchOption searchOption) {
+        return apartmentRepository.searchApartments(searchOption);
     }
 }

@@ -131,4 +131,7 @@ local.properties
 hs_err_pid*
 replay_pid*
 
+# QueryDSL
+/src/main/generated/
+
 # End of https://www.toptal.com/developers/gitignore/api/eclipse,java
