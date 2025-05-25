@@ -4,6 +4,7 @@ import JoinView from '@/views/JoinView.vue'
 import FindIdView from '@/views/FindIdView.vue'
 import FindPasswordView from '@/views/FindPasswordView.vue'
 import HouseMapView from '@/views/HouseMapView.vue'
+import HouseMapView2 from '@/views/HouseMapView2.vue'
 import BbsView from '@/views/BbsView.vue'
 import BbsWriteView from '@/views/BbsWriteView.vue'
 import BbsDetailView from '@/views/BbsDetailView.vue'
@@ -27,6 +28,7 @@ const router = createRouter({
     { path: '/findPassword', name: 'FindPassword', component: FindPasswordView },
     { path: '/reset-password', name: 'ResetPasswordForm', component: ResetPasswordForm },
     { path: '/houseMap', name: 'HouseMap', component: HouseMapView },
+    { path: '/houseMap2', name: 'HouseMap2', component: HouseMapView2 },
     { path: '/bbs', name: 'Bbs', component: BbsView },
     { path: '/bbs/write', name: 'BbsWrite', component: BbsWriteView },
     { path: '/bbs/:id', name: 'BbsDetail', component: BbsDetailView, props: true },
