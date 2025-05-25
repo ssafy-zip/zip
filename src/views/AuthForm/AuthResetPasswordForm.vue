@@ -1,10 +1,5 @@
 <template>
-  <div class="form-container">
-    <div class="form-header">
-      <router-link to="/">
-        <img src="/logo/logo-light-128.png" class="form-logo" />
-      </router-link>
-    </div>
+  <AuthFormLayout>
     <div class="form-box">
       <h2 class="form-title">비밀번호 재설정</h2>
       <form class="reset-form" @submit.prevent="handleSubmit">
@@ -39,7 +34,7 @@
         {{ message }}
       </div>
     </div>
-  </div>
+  </AuthFormLayout>
 </template>
 
 <script setup>
@@ -47,6 +42,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { ERROR_MESSAGES } from '@/constants/error'
+import AuthFormLayout from './AuthFormLayout.vue'
 import BaseInput from '@/components/BaseInput.vue'
 import { useValidation } from '@/utils/useValidation'
 const { isValidPassword } = useValidation()

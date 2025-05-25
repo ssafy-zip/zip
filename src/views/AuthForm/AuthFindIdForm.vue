@@ -1,12 +1,5 @@
 <template>
-  <div class="form-container">
-    <!-- 헤더 -->
-    <div class="form-header">
-      <router-link to="/">
-        <img src="/logo/logo-light-128.png" class="form-logo" />
-      </router-link>
-    </div>
-
+  <AuthFormLayout>
     <form class="form-box" @submit.prevent="handleFindId">
       <h2 class="form-title">아이디 찾기</h2>
       <!-- 이메일 -->
@@ -35,7 +28,7 @@
       <router-link :to="{ name: 'Login' }">로그인</router-link>
       <router-link :to="{ name: 'Join' }">회원가입</router-link>
     </div>
-  </div>
+  </AuthFormLayout>
 </template>
 
 <script setup>
@@ -43,6 +36,7 @@ import { ref, computed } from 'vue'
 import axios from 'axios'
 import { useValidation } from '@/utils/useValidation'
 import { ERROR_MESSAGES } from '@/constants/error'
+import AuthFormLayout from './AuthFormLayout.vue'
 import BaseInput from '@/components/BaseInput.vue'
 
 const { isValidEmail } = useValidation()
