@@ -1,11 +1,5 @@
 <template>
-  <div class="form-container">
-    <div class="form-header">
-      <router-link to="/">
-        <img src="/logo/logo-light-128.png" class="form-logo" />
-      </router-link>
-    </div>
-
+  <AuthFormLayout>
     <form class="form-box" @submit.prevent="handleJoin">
       <h2 class="form-title">회원가입</h2>
 
@@ -106,9 +100,9 @@
         <router-link :to="{ name: 'Login' }"> 이미 계정이 있으신가요? 로그인 </router-link>
       </div>
     </form>
-  </div>
+    <TermsModal :visible="show" :title="title" :content="content" @close="close" />
+  </AuthFormLayout>
   <!-- 약관 모달 -->
-  <TermsModal :visible="show" :title="title" :content="content" @close="close" />
 </template>
 
 <script setup>
@@ -116,6 +110,7 @@ import { computed, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { ERROR_MESSAGES } from '@/constants/error'
+import AuthFormLayout from './AuthFormLayout.vue'
 import BaseInput from '@/components/BaseInput.vue'
 
 import TermsModal from '@/components/TermsModal.vue'

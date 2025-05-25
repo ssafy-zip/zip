@@ -1,12 +1,5 @@
 <template>
-  <div class="form-container">
-    <!-- 헤더 -->
-    <div class="form-header">
-      <router-link to="/">
-        <img src="/logo/logo-light-128.png" class="form-logo" />
-      </router-link>
-    </div>
-
+  <AuthFormLayout>
     <!-- 폼 -->
     <form class="form-box" @submit.prevent="handleSubmit">
       <!-- 아이디 -->
@@ -66,13 +59,14 @@
         <router-link :to="{ name: 'Join' }">회원가입</router-link>
       </div>
     </form>
-  </div>
+  </AuthFormLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import AuthFormLayout from './AuthFormLayout.vue'
 import { ERROR_MESSAGES } from '@/constants/error'
 import BaseInput from '@/components/BaseInput.vue'
 

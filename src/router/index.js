@@ -1,8 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import LoginView from '@/views/LoginView.vue'
-import JoinView from '@/views/JoinView.vue'
-import FindIdView from '@/views/FindIdView.vue'
-import FindPasswordView from '@/views/FindPasswordView.vue'
+import HomeView from '@/views/HomeView.vue'
+import LoginForm from '@/views/AuthForm/AuthLoginForm.vue'
+import JoinForm from '@/views/AuthForm/AuthJoinForm.vue'
+import FindIdForm from '@/views/AuthForm/AuthFindIdForm.vue'
+import FindPasswordForm from '@/views/AuthForm/AuthFindPasswordForm.vue'
+import ResetPasswordForm from '@/views/AuthForm/AuthResetPasswordForm.vue'
 import HouseMapView from '@/views/HouseMapView.vue'
 import HouseMapView2 from '@/views/HouseMapView2.vue'
 import BbsView from '@/views/BbsView.vue'
@@ -15,17 +17,15 @@ import MyInfoCommentsView from '@/views/MyInfoView/MyInfoCommentsView.vue'
 import MyInfoPostsView from '@/views/MyInfoView/MyInfoPostsView.vue'
 import MyInfoFavoritesView from '@/views/MyInfoView/MyInfoFavoritesView.vue'
 import ChatView from '@/views/ChatView.vue'
-import HomeView from '@/views/HomeView.vue'
-import ResetPasswordForm from '@/views/ResetPasswordForm.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/', name: 'Home', component: HomeView },
-    { path: '/login', name: 'Login', component: LoginView },
-    { path: '/join', name: 'Join', component: JoinView },
-    { path: '/findId', name: 'FindId', component: FindIdView },
-    { path: '/findPassword', name: 'FindPassword', component: FindPasswordView },
+    { path: '/login', name: 'Login', component: LoginForm },
+    { path: '/join', name: 'Join', component: JoinForm },
+    { path: '/findId', name: 'FindId', component: FindIdForm },
+    { path: '/findPassword', name: 'FindPassword', component: FindPasswordForm },
     { path: '/reset-password', name: 'ResetPasswordForm', component: ResetPasswordForm },
     { path: '/houseMap', name: 'HouseMap', component: HouseMapView },
     { path: '/houseMap2', name: 'HouseMap2', component: HouseMapView2 },
