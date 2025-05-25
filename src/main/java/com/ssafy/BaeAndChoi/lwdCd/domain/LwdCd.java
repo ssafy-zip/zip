@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 public class LwdCd {
 
-    /** 법정동 코드 (시도+시군구+읍면동 코드 조합, 10자리) */
+    /** 법정동 코드 (시도+시군구+읍면동+리 코드 조합, 10자리) */
     @Id
     @Column(name = "code", length = 10, nullable = false)
     private String code;
@@ -27,5 +27,8 @@ public class LwdCd {
     /** 읍면동 이름 (예: 역삼동, 장안동 등) */
     @Column(name = "umd_name", length = 30)
     private String umdName;
-}
 
+    /** 리 이름 (예: 송산리, 중리 등) */
+    @Column(name = "ri_name", length = 30)
+    private String riName;
+}

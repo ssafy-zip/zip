@@ -30,8 +30,9 @@ public class ApartmentRepositoryImpl implements ApartmentRepositoryCustom {
                 .selectFrom(apartment)
                 .where(
                         hasText(aptNm) ? apartment.aptNm.contains(aptNm) : null,
-                        isValidCode(code) ? apartment.sggCd.eq(code.substring(0, 5)) : null,
-                        isValidCode(code) ? apartment.umdCd.eq(code.substring(5)) : null
+                        isValidCode(code) ? Expressions.stringTemplate("SUBSTRING(CONCAT({0}, {1}), 1, {2})", apartment.sggCd, apartment.umdCd, code.length())
+                                .eq(code)
+                                : null
                 )
                 .fetch();
     }
@@ -40,6 +41,9 @@ public class ApartmentRepositoryImpl implements ApartmentRepositoryCustom {
         return s != null && !s.trim().isEmpty();
     }
     private boolean isValidCode(String code) {
-        return code != null && code.length() >= 10;
+        if(code == null) return false;
+
+        int codeLength = code.length();
+        return codeLength == 2 || codeLength == 5 || codeLength == 8 || codeLength == 10;
     }
 }

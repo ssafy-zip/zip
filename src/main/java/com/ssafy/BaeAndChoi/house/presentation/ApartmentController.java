@@ -23,11 +23,11 @@ public class ApartmentController {
     private final ApartmentService apartmentService;
 
     @GetMapping("/insertApartmentDeal")
-    public ResponseEntity<String> insertHouseDealInfo() {
+    public ResponseEntity<String> insertHouseDealInfo(@RequestParam(required = false) String code) {
         HashSet<String> dongCodes = apartmentService.requestDongCodes();
         log.info("최종 수집된 동코드 : {}", dongCodes);
         dongCodes.clear();
-        dongCodes.add("11110");
+        dongCodes.add(code != null ? code : "11110");
         ArrayList<AptTradeBasicData> aptTradeBasicDataList = apartmentService.getRealEstateDealInfo(dongCodes);
         apartmentService.addApartmentDeal(aptTradeBasicDataList);
         return new ResponseEntity<>("success", HttpStatus.OK);

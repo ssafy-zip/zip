@@ -7,12 +7,14 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 @Builder
 public class LwdCdResponseDTO {
     private String code;
     private String sidoName;
     private String sggName;
     private String umdName;
+    private String riName;
 
     public static LwdCdResponseDTO fromEntity(LwdCd lwdCd) {
         return LwdCdResponseDTO.builder()
@@ -20,16 +22,7 @@ public class LwdCdResponseDTO {
                 .sidoName(lwdCd.getSidoName())
                 .sggName(lwdCd.getSggName())
                 .umdName(lwdCd.getUmdName())
+                .riName(lwdCd.getRiName())
                 .build();
-    }
-
-    @Override
-    public String toString() {
-        return "LwdCdResponseDTO{" +
-                "code='" + code + '\'' +
-                ", sidoName='" + sidoName + '\'' +
-                ", sggName='" + sggName + '\'' +
-                ", umdName='" + umdName + '\'' +
-                '}';
     }
 }
