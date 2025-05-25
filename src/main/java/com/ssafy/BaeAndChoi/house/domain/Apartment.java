@@ -1,7 +1,6 @@
 package com.ssafy.BaeAndChoi.house.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.ssafy.BaeAndChoi.house.domain.ApartmentDeal;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.ArrayList;
@@ -27,6 +26,22 @@ public class Apartment {
     @Column(name = "apt_nm", length = 200, nullable = false)
     private String aptNm;
 
+    /** 건축년도 */
+    @Column(name = "build_year")
+    private int buildYear;
+
+    /** 시군구 코드 (sggCd) */
+    @Column(name = "sgg_cd", length = 10)
+    private String sggCd;
+
+    /** 읍면동 코드 (umdCd) */
+    @Column(name = "umd_cd", length = 10)
+    private String umdCd;
+
+    /** 읍면동명 (umdNm) */
+    @Column(name = "umd_nm", length = 100)
+    private String umdNm;
+
     /** 본번 (지번) */
     @Column(name = "bonbun", length = 10)
     private String bonbun;
@@ -35,17 +50,9 @@ public class Apartment {
     @Column(name = "bubun", length = 10)
     private String bubun;
 
-    /** 건축년도 */
-    @Column(name = "build_year")
-    private int buildYear;
-
-    /** 법정동 코드 (umdCd) */
-    @Column(name = "umd_cd", length = 10)
-    private String umdCd;
-
-    /** 읍면동명 (umdNm) */
-    @Column(name = "umd_nm", length = 100)
-    private String umdNm;
+    /** 도로명 일련번호 */
+    @Column(name = "road_nm_seq", length = 10)
+    private String roadNmSeq;
 
     /** 도로명 */
     @Column(name = "road_nm", length = 200)
@@ -63,10 +70,6 @@ public class Apartment {
     @Column(name = "road_nm_cd", length = 20)
     private String roadNmCd;
 
-    /** 도로명 일련번호 */
-    @Column(name = "road_nm_seq", length = 10)
-    private String roadNmSeq;
-
     /** 도로명 시군구 코드 */
     @Column(name = "road_nm_sgg_cd", length = 10)
     private String roadNmSggCd;
@@ -74,10 +77,6 @@ public class Apartment {
     /** 도로번호 코드 */
     @Column(name = "road_nmb_cd", length = 10)
     private String roadNmbCd;
-
-    /** 시군구 코드 (sggCd) */
-    @Column(name = "sgg_cd", length = 10)
-    private String sggCd;
 
     /** 토지 용도 코드 (landCd) */
     @Column(name = "land_cd", length = 10)

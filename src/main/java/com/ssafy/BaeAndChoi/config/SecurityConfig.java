@@ -60,7 +60,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/boards/**/comments","/api/interestRegion").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/boards/**/comments/**").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/boards/**","/api/interestRegion/**").authenticated()
-                        .requestMatchers(HttpMethod.GET,"/api/interestRegion/**","/api/interestHouse/**").authenticated()
+                        .requestMatchers(HttpMethod.GET,"/api/interestRegion/**","/api/interestHouse/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .authenticationManager(authenticationManager(http))
