@@ -22,9 +22,9 @@ spring:
       matching-strategy: ant_path_matcher
     static-path-pattern: /static/**
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/ssafyhome?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
-    username: ssafy
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://yaguhang.kro.kr:3306/ssafy3?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: ssafy3
     password: ssafy
   jpa:
     properties:
@@ -32,7 +32,7 @@ spring:
         show_sql: true
         format_sql: true
         hbm2ddl:
-          auto: update
+          auto: create
   mail:
     host: smtp.gmail.com
     port: 587
