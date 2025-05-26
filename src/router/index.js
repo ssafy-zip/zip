@@ -5,16 +5,19 @@ import JoinForm from '@/views/AuthForm/AuthJoinForm.vue'
 import FindIdForm from '@/views/AuthForm/AuthFindIdForm.vue'
 import FindPasswordForm from '@/views/AuthForm/AuthFindPasswordForm.vue'
 import ResetPasswordForm from '@/views/AuthForm/AuthResetPasswordForm.vue'
+
 import HouseMapView from '@/views/HouseMapView.vue'
 import BbsView from '@/views/BbsView.vue'
 import BbsWriteView from '@/views/BbsWriteView.vue'
 import BbsDetailView from '@/views/BbsDetailView.vue'
 import NewsListView from '@/views/NewsListView.vue'
+
 import MyInfoView from '@/views/MyInfoView/MyInfoView.vue'
 import MyInfoProfileView from '@/views/MyInfoView/MyInfoProfileView.vue'
 import MyInfoCommentsView from '@/views/MyInfoView/MyInfoCommentsView.vue'
 import MyInfoPostsView from '@/views/MyInfoView/MyInfoPostsView.vue'
 import MyInfoFavoritesView from '@/views/MyInfoView/MyInfoFavoritesView.vue'
+
 import ChatView from '@/views/ChatView.vue'
 
 const router = createRouter({
