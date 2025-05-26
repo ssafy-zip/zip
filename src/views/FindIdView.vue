@@ -40,7 +40,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import axios from 'axios'
+import baseURL from '@/baseURL'
 import { useValidation } from '@/utils/useValidation'
 import { ERROR_MESSAGES } from '@/constants/error'
 import BaseInput from '@/components/BaseInput.vue'
@@ -72,7 +72,7 @@ const handleFindId = async () => {
   isLoading.value = true
 
   try {
-    const { data } = await axios.post('/api/users/find-id', {
+    const { data } = await baseURL.post('/api/users/find-id', {
       email: email.value,
     })
     // 성공 메시지

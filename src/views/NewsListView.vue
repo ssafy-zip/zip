@@ -22,13 +22,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import baseURL from '@/baseURL'
 
 const news = ref([])
 
 async function fetchNews() {
   try {
-    const res = await axios.get('/api/news')
+    const res = await baseURL.get('/api/news')
     news.value = res.data
   } catch (err) {
     console.error(err)

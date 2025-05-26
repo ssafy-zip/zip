@@ -45,7 +45,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import baseURL from '@/baseURL'
 import { ERROR_MESSAGES } from '@/constants/error'
 import BaseInput from '@/components/BaseInput.vue'
 import { useValidation } from '@/utils/useValidation'
@@ -96,7 +96,7 @@ const handleSubmit = async () => {
   isLoading.value = true
   try {
     // userId는 쿼리로, password는 바디로 전송
-    const { data } = await axios.post(
+    const { data } = await baseURL.post(
       '/api/users/reset-password',
       { password: newPassword.value },
       { params: { userId: userId.value } },

@@ -72,7 +72,7 @@
 <script setup>
 import { ref, computed, onMounted, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import baseURL from '@/baseURL'
 import { ERROR_MESSAGES } from '@/constants/error'
 import BaseInput from '@/components/BaseInput.vue'
 
@@ -100,7 +100,7 @@ async function handleSubmit() {
 
   try {
     // 1) 로그인 API 호출
-    const { data } = await axios.post('/api/users/login', {
+    const { data } = await baseURL.post('/api/users/login', {
       userId: username.value,
       password: password.value,
     })

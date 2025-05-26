@@ -24,7 +24,7 @@
 import InputModal from './InputModal.vue'
 import { ref, computed, watch, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import baseURL from '@/baseURL'
 // Props
 const props = defineProps({ visible: Boolean })
 const emit = defineEmits(['close', 'deleted'])
@@ -56,7 +56,7 @@ const submit = async () => {
   if (!isValid.value) return
   try {
     const token = localStorage.getItem('authToken')
-    await axios.delete('/api/users/deleteUserId', {
+    await baseURL.delete('/api/users/deleteUserId', {
       headers: { Authorization: `Bearer ${token}` },
       data: password.value,
     })

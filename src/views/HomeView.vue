@@ -24,7 +24,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
+import baseURL from '@/baseURL'
 
 defineOptions({ name: 'HomeView' })
 
@@ -61,7 +61,7 @@ onMounted(async () => {
   try {
     const today = new Date().toISOString().slice(0, 10)
 
-    const response = await axios.get('/api/news/getTodayNewsSummation', {
+    const response = await baseURL.get('/api/news/getTodayNewsSummation', {
       params: { date: today },
     })
 

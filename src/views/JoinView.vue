@@ -114,7 +114,7 @@
 <script setup>
 import { computed, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import baseURL from '@/baseURL'
 import { ERROR_MESSAGES } from '@/constants/error'
 import BaseInput from '@/components/BaseInput.vue'
 
@@ -182,7 +182,7 @@ async function handleJoin() {
   }
 
   try {
-    await axios.post('/api/users', {
+    await baseURL.post('/api/users', {
       userId: form.userId,
       password: form.password,
       name: form.name,

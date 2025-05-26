@@ -31,7 +31,7 @@
 
 <script setup>
 import { reactive, watch } from 'vue'
-import axios from 'axios'
+import baseURL from '@/baseURL'
 
 const props = defineProps({
   visible: Boolean,
@@ -69,7 +69,7 @@ async function save() {
       phone: form.phone,
     }
     const token = localStorage.getItem('authToken')
-    await axios.post('/api/users/updateUser', payload, {
+    await baseURL.post('/api/users/updateUser', payload, {
       headers: { Authorization: `Bearer ${token}` },
     })
     emit('saved', { name: form.name, email: form.email, phone: form.phone })

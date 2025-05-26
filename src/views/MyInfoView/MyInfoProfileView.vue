@@ -86,7 +86,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import axios from 'axios'
+import baseURL from '@/baseURL'
 
 import InputProfileModal from '@/components/InputModal/InputProfileModal.vue'
 import InputPasswordModal from '@/components/InputModal/InputPasswordModal.vue'
@@ -112,7 +112,7 @@ onMounted(async () => {
     // 로컬스토리지에서 JWT 꺼내기
     const token = localStorage.getItem('authToken')
     // getUserInfo 호출 (헤더에 Bearer 토큰 포함)
-    const { data } = await axios.get('/api/users/getUserInfo', {
+    const { data } = await baseURL.get('/api/users/getUserInfo', {
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -153,7 +153,7 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue'
-import axios from 'axios'
+import baseURL from '@/baseURL'
 import { useLwdCd } from '@/utils/userLwdCd'
 import { useKakaoMap } from '@/utils/useKakaoMap.js'
 import { useMarker } from '@/utils/userMaker.js'
@@ -176,7 +176,7 @@ const { markersVisibleByType, clustererByType, toggleMarkers, createMarkers } = 
 
 // JWT 토큰 설정
 const token = localStorage.getItem('authToken')
-if (token) axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+if (token) baseURL.defaults.headers.common['Authorization'] = `Bearer ${token}`
 // 지도 관련 변수
 const mapContainer = ref(null)
 let map = null
@@ -199,7 +199,7 @@ watch(
       return
     }
     try {
-      const { data } = await axios.get('/api/interestRegion/isInterestRegion', {
+      const { data } = await baseURL.get('/api/interestRegion/isInterestRegion', {
         params: { lwdCd: newCode + '00' },
       })
       const clean = String(data).trim().replace(/^"|"$/g, '')
@@ -217,12 +217,12 @@ async function toggleFavoriteRegion() {
   if (!selectedUmd.value) return
   try {
     if (isStarred.value) {
-      await axios.delete('/api/interestRegion', {
+      await baseURL.delete('/api/interestRegion', {
         params: { lwdCd: selectedUmd.value + '00' },
       })
       isStarred.value = false
     } else {
-      await axios.post('/api/interestRegion', { lwdCd: selectedUmd.value + '00' })
+      await baseURL.post('/api/interestRegion', { lwdCd: selectedUmd.value + '00' })
       isStarred.value = true
     }
   } catch (error) {
@@ -264,7 +264,7 @@ const toggleFavoriteMarkers = () => toggleMarkers('favorite', map)
 async function searchApt() {
   try {
     // 아파트 검색
-    const { data } = await axios.get('/api/apartments/apt', {
+    const { data } = await baseURL.get('/api/apartments/apt', {
       params: {
         aptNm: aptNm.value,
         code: selectedUmd.value || selectedSgg.value || selectedSido.value,
@@ -273,7 +273,7 @@ async function searchApt() {
     searchApartments.value = data
     // 마커 생성
     await createMarkers('search', searchApartments, map, async (apt) => {
-      const { data: lwdCd } = await axios.get(`/api/lwdCd/${apt.sggCd + apt.umdCd}`)
+      const { data: lwdCd } = await baseURL.get(`/api/lwdCd/${apt.sggCd + apt.umdCd}`)
       return getLwdCdFullName(lwdCd) + ' ' + apt.bonbun + (apt.bubun ? '-' + apt.bubun : '')
     })
   } catch (error) {
@@ -284,7 +284,7 @@ async function searchApt() {
 async function loadFavoriteApt() {
   try {
     // 아파트 검색
-    const { data } = await axios.get('/api/interestHouse/interestHouses')
+    const { data } = await baseURL.get('/api/interestHouse/interestHouses')
     favoriteApartments.value = data
     // 마커 생성
     await createMarkers(
@@ -292,7 +292,7 @@ async function loadFavoriteApt() {
       favoriteApartments,
       map,
       async (apt) => {
-        const { data: lwdCd } = await axios.get(`/api/lwdCd/${apt.sggCd + apt.umdCd}`)
+        const { data: lwdCd } = await baseURL.get(`/api/lwdCd/${apt.sggCd + apt.umdCd}`)
         return getLwdCdFullName(lwdCd) + ' ' + apt.bonbun + (apt.bubun ? '-' + apt.bubun : '')
       },
       {

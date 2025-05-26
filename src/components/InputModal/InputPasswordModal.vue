@@ -32,7 +32,7 @@
 <script setup>
 import InputModal from './InputModal.vue'
 import { ref, computed } from 'vue'
-import axios from 'axios'
+import baseURL from '@/baseURL'
 
 defineProps({
   visible: Boolean,
@@ -60,7 +60,7 @@ const submit = async () => {
   isLoading.value = true
   try {
     const token = localStorage.getItem('authToken')
-    await axios.post(
+    await baseURL.post(
       '/api/users/updatePassword',
       { newPassword: password.value }, // <-- DTO 형태로 보냅니다
       {

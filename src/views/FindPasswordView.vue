@@ -48,7 +48,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import baseURL from '@/baseURL'
 import { useValidation } from '@/utils/useValidation'
 import { ERROR_MESSAGES } from '@/constants/error'
 import BaseInput from '@/components/BaseInput.vue'
@@ -84,7 +84,7 @@ const handleFindPw = async () => {
 
   try {
     // 3) API 호출
-    const { data } = await axios.post('/api/users/canExchangePassword', {
+    const { data } = await baseURL.post('/api/users/canExchangePassword', {
       userId: username.value,
       email: email.value,
     })

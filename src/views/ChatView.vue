@@ -40,7 +40,7 @@
 
 <script setup>
 import { ref, onMounted, getCurrentInstance, nextTick, watch, computed } from 'vue'
-import axios from 'axios'
+import baseURL from '@/baseURL'
 import MarkdownIt from 'markdown-it'
 
 const md = new MarkdownIt()
@@ -94,7 +94,7 @@ async function loadHistory() {
 
     console.log(token)
     console.log(userId)
-    const res = await axios.get('/api/chat/history', {
+    const res = await baseURL.get('/api/chat/history', {
       headers,
       params: { userId },
     })
@@ -136,7 +136,7 @@ async function sendMessage() {
     console.log(userId)
 
     // userId는 쿼리 파라미터로 전달
-    const res = await axios.post(
+    const res = await baseURL.post(
       '/api/chat',
       { userInput: content },
       { headers, params: { userId } },

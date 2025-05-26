@@ -1,7 +1,8 @@
 /* lwdCdUtil.js */
 
 import { ref, watch } from 'vue'
-import axios from 'axios'
+// import baseURL from 'baseURL'
+import baseURL from '@/baseURL'
 
 export function useLwdCd() {
   const sidoList = ref([])
@@ -26,7 +27,8 @@ export function useLwdCd() {
     sidoList.value = []
 
     try {
-      const { data } = await axios.get('/api/lwdCd/sido/simple')
+      const { data } = await baseURL.get('/api/lwdCd/sido/simple')
+      console.log('시도 목록 : ', data)
       sidoList.value = data
     } catch (error) {
       console.error('시도 목록 조회 실패:', error)
@@ -41,7 +43,8 @@ export function useLwdCd() {
     if (!selectedSido.value) return
 
     try {
-      const { data } = await axios.get(`/api/lwdCd/sgg/${selectedSido.value}/simple`)
+      console.log(selectedSido.value)
+      const { data } = await baseURL.get(`/api/lwdCd/sgg/${selectedSido.value}/simple`)
       sggList.value = data
     } catch (error) {
       console.error('시군구 목록 조회 실패:', error)
@@ -56,7 +59,7 @@ export function useLwdCd() {
     if (!selectedSgg.value) return
 
     try {
-      const { data } = await axios.get(`/api/lwdCd/umd/${selectedSgg.value}/simple`)
+      const { data } = await baseURL.get(`/api/lwdCd/umd/${selectedSgg.value}/simple`)
       umdList.value = data
     } catch (error) {
       console.error('읍면동 목록 조회 실패:', error)

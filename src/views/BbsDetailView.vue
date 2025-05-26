@@ -83,7 +83,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import baseURL from '@/baseURL'
 
 const route = useRoute()
 const router = useRouter()
@@ -140,7 +140,7 @@ const isMyComment = (writerId) => writerId === currentUser.value
 // 데이터 로드
 async function fetchDetail() {
   try {
-    const { data } = await axios.get(`/api/boards/${boardId}`)
+    const { data } = await baseURL.get(`/api/boards/${boardId}`)
     // backend now returns writerId
     post.value = {
       ...data,
@@ -152,7 +152,7 @@ async function fetchDetail() {
 }
 async function fetchComments() {
   try {
-    const { data } = await axios.get(`/api/boards/${boardId}/comments`)
+    const { data } = await baseURL.get(`/api/boards/${boardId}/comments`)
     comments.value = data
   } catch (e) {
     console.error(e)
@@ -175,7 +175,7 @@ async function savePostEdit() {
     return
   }
   try {
-    await axios.put(
+    await baseURL.put(
       `/api/boards/${boardId}`,
       { title: editTitle.value, content: editContent.value },
       { headers: { Authorization: `Bearer ${token}` } },
@@ -197,7 +197,9 @@ async function deletePost() {
     return
   }
   try {
-    await axios.delete(`/api/boards/${boardId}`, { headers: { Authorization: `Bearer ${token}` } })
+    await baseURL.delete(`/api/boards/${boardId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
     goBack()
   } catch (e) {
     console.error(e)
@@ -213,7 +215,7 @@ async function addComment() {
     return
   }
   try {
-    await axios.post(
+    await baseURL.post(
       `/api/boards/${boardId}/comments`,
       { content: newComment.value },
       { headers: { Authorization: `Bearer ${token}` } },
@@ -232,7 +234,7 @@ async function removeComment(id) {
     return
   }
   try {
-    await axios.delete(`/api/boards/${boardId}/comments/${id}`, {
+    await baseURL.delete(`/api/boards/${boardId}/comments/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     await fetchComments()
@@ -255,7 +257,7 @@ async function saveCommentEdit(id) {
     return
   }
   try {
-    await axios.put(
+    await baseURL.put(
       `/api/boards/${boardId}/comments/${id}`,
       { content: editingContent.value },
       { headers: { Authorization: `Bearer ${token}` } },

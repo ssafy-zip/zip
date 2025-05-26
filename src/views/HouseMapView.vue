@@ -258,7 +258,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
-import axios from 'axios'
+import baseURL from '@/baseURL'
 // 차트 ref 추가
 const chartRef = ref(null)
 import { useLwdCd } from '@/utils/userLwdCd'
@@ -267,7 +267,7 @@ import { useMarker } from '@/utils/userMaker.js'
 
 // JWT 토큰 설정
 const token = localStorage.getItem('authToken')
-if (token) axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+if (token) baseURL.defaults.headers.common['Authorization'] = `Bearer ${token}`
 
 const {
   updateSidoList,
@@ -337,7 +337,7 @@ watch(
       return
     }
     try {
-      const { data } = await axios.get('/api/interestRegion/isInterestRegion', {
+      const { data } = await baseURL.get('/api/interestRegion/isInterestRegion', {
         params: { lwdCd: newCode + '00' },
       })
       const clean = String(data).trim().replace(/^"|"$/g, '')
@@ -415,7 +415,7 @@ async function searchApt() {
 
   try {
     // 아파트 검색
-    const { data } = await axios.get('/api/apartments/apt', {
+    const { data } = await baseURL.get('/api/apartments/apt', {
       params: {
         aptNm: aptNm.value.trim(),
         code: selectedUmd.value || selectedSgg.value || selectedSido.value,
@@ -425,7 +425,7 @@ async function searchApt() {
 
     // 마커 표시
     await createMarkers('search', searchApartments, map, async (apt) => {
-      const { data: lwdCd } = await axios.get(`/api/lwdCd/${apt.sggCd + apt.umdCd}`)
+      const { data: lwdCd } = await baseURL.get(`/api/lwdCd/${apt.sggCd + apt.umdCd}`)
       return getLwdCdFullName(lwdCd) + ' ' + apt.bonbun + (apt.bubun ? '-' + apt.bubun : '')
     })
 
@@ -469,7 +469,7 @@ async function loadFavoriteApartments() {
       if (code >= 8) params.gu = code.value.slice(5, 8)
     }
 
-    const { data } = await axios.get('/api/interestHouse/interestHouses', {
+    const { data } = await baseURL.get('/api/interestHouse/interestHouses', {
       headers: { Authorization: `Bearer ${token}` },
       params,
     })
@@ -480,7 +480,7 @@ async function loadFavoriteApartments() {
       favoriteApartments,
       map,
       async (apt) => {
-        const { data: lwdCd } = await axios.get(`/api/lwdCd/${apt.sggCd + apt.umdCd}`)
+        const { data: lwdCd } = await baseURL.get(`/api/lwdCd/${apt.sggCd + apt.umdCd}`)
         return getLwdCdFullName(lwdCd) + ' ' + apt.bonbun + (apt.bubun ? '-' + apt.bubun : '')
       },
       {
@@ -808,12 +808,12 @@ async function toggleFavoriteRegion() {
 
   try {
     if (isStarred.value) {
-      await axios.delete('/api/interestRegion', {
+      await baseURL.delete('/api/interestRegion', {
         params: { lwdCd: selectedUmd.value + '00' },
       })
       isStarred.value = false
     } else {
-      await axios.post('/api/interestRegion', { lwdCd: selectedUmd.value + '00' })
+      await baseURL.post('/api/interestRegion', { lwdCd: selectedUmd.value + '00' })
       isStarred.value = true
     }
   } catch (error) {
@@ -831,7 +831,7 @@ async function checkIsAptFavorite(aptSeq) {
   if (!token) return false
 
   try {
-    const { data } = await axios.get('/api/interestHouse/isInterestHouses', {
+    const { data } = await baseURL.get('/api/interestHouse/isInterestHouses', {
       params: { aptSeq },
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -854,7 +854,7 @@ async function toggleAptFavorite(apt) {
 
   try {
     if (isFavorite) {
-      await axios.delete('/api/interestHouse', {
+      await baseURL.delete('/api/interestHouse', {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -863,7 +863,7 @@ async function toggleAptFavorite(apt) {
       })
       favoriteApts.value.delete(aptSeq)
     } else {
-      await axios.post(
+      await baseURL.post(
         '/api/interestHouse',
         { aptSeq },
         { headers: { Authorization: `Bearer ${token}` } },

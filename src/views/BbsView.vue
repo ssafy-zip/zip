@@ -105,7 +105,7 @@
 <script setup>
 import { ref, getCurrentInstance, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import baseURL from '@/baseURL'
 
 // 전역 auth 플러그인 사용
 const { proxy } = getCurrentInstance()
@@ -148,7 +148,7 @@ async function fetchPosts() {
       params.query = searchQuery.value.trim()
     }
 
-    const resp = await axios.get('/api/boards', { params })
+    const resp = await baseURL.get('/api/boards', { params })
     posts.value = resp.data.content.map((b) => ({
       id: b.id,
       title: b.title,
