@@ -32,7 +32,7 @@ public class NewsCrawlingService {
      */
     @Transactional
     public void crawlNewsByDate(String date) {
-        WebDriver driver = createHeadlessDriver();
+        WebDriver driver = createWebDriver();
         try {
             Document doc = fetchDocument(driver, date);
             parseAndSave(doc);
@@ -44,17 +44,23 @@ public class NewsCrawlingService {
         }
     }
 
-    private WebDriver createHeadlessDriver() {
+    private WebDriver createWebDriver() {
+        setUpWebDriver();
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless", "--no-sandbox", "--disable-dev-shm-usage", "--window-size=1920,1080");
         WebDriverManager.chromedriver().setup();
-        ChromeOptions opts = new ChromeOptions();
-        opts.addArguments(
-                "--headless",
-                "--disable-gpu",
-                "--no-sandbox",
-                "--disable-dev-shm-usage",
-                "--window-size=1920,1080"
-        );
-        return new ChromeDriver(opts);
+        return new ChromeDriver(options);
+    }
+
+    private void setUpWebDriver() {
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("win")) {
+            System.setProperty("webdriver.chrome.driver", "drivers/chromedriver_win.exe");
+        } else if (os.contains("mac")) {
+            System.setProperty("webdriver.chrome.driver", "/Users/minseok/chromedriver-mac-arm64/chromedriver");
+        } else if (os.contains("linux")) {
+            System.setProperty("webdriver.chrome.driver", "/home/mschoi/chromedriver-linux64/chromedriver");
+        }
     }
 
     private Document fetchDocument(WebDriver driver, String date) throws InterruptedException {

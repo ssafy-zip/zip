@@ -32,7 +32,7 @@ spring:
         show_sql: true
         format_sql: true
         hbm2ddl:
-          auto: create
+          auto: update
   mail:
     host: smtp.gmail.com
     port: 587
@@ -73,7 +73,7 @@ logging:
     org.springframework.ai.chat: DEBUG
     org.springframework.web.client.RestClient: TRACE
 server:
-  port: 8080
+  port: 8082
   tomcat:
     uri-encoding: UTF-8
 API:
