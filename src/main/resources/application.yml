@@ -22,9 +22,9 @@ spring:
       matching-strategy: ant_path_matcher
     static-path-pattern: /static/**
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/ssafyhome?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
-    username: ssafy
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://yaguhang.kro.kr:3306/ssafy3?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: ssafy3
     password: ssafy
   jpa:
     properties:
@@ -73,9 +73,9 @@ logging:
     org.springframework.ai.chat: DEBUG
     org.springframework.web.client.RestClient: TRACE
 server:
-  port: 8080
+  port: 8082
   tomcat:
     uri-encoding: UTF-8
 API:
-#  key: eq3Do1yF57fqENuUSWwSlibvbOtmwRIgJLStRfGz%2BK1CqY6rKvCGH7vfXUZmXgmv0XWVGa7kGz7W0Cnz5EKA4w%3D%3D
+  #  key: eq3Do1yF57fqENuUSWwSlibvbOtmwRIgJLStRfGz%2BK1CqY6rKvCGH7vfXUZmXgmv0XWVGa7kGz7W0Cnz5EKA4w%3D%3D
   key: SECRET_EXTERNAL_API_KEY

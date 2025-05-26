@@ -61,6 +61,8 @@ public class LwdCdController {
             @Pattern(regexp = "\\d{2}", message = "시/도 코드는 2자리 숫자여야 합니다.")
             String code) {
         List<LwdCdSimpleResponseDTO> responseList = lwdCdService.findSggBySidoCodeSimple(code);
+
+        System.out.println("responseList = " + responseList);
         return wrapResponse(responseList);
     }
 
@@ -86,6 +88,7 @@ public class LwdCdController {
             String code) {
         List<LwdCdSimpleResponseDTO> responseList = lwdCdService.findUmdBySggCodeSimple(code);
 
+        System.out.println("responseList = " + responseList);
         return wrapResponse(responseList);
     }
 
