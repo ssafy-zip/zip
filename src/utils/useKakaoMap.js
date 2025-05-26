@@ -1,6 +1,6 @@
 /* kakaoMapUtil.js */
 
-const DEFAULT_DISPLAY_LEVEL = 5
+const DEFAULT_DISPLAY_LEVEL = 4
 let kakaoScriptPromise = null
 
 /* 스크립트 로드 */

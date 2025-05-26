@@ -63,15 +63,6 @@ export function useLwdCd() {
     }
   }
 
-  // 법정동 동시에 선택
-  async function selectLocation(code) {
-    selectedSido.value = code.slice(0, 2)
-    await updateSggList()
-    selectedSgg.value = code.slice(0, 5)
-    await updateUmdList()
-    selectedUmd.value = code.slice(0, 8)
-  }
-
   // 시도 검색에 따른 시군구 조회
   watch(selectedSido, async (newSido) => {
     const isValid = sidoList.value.some((v) => v.code === newSido)
@@ -97,6 +88,15 @@ export function useLwdCd() {
       selectedUmd.value = ''
     }
   })
+
+  // 법정동 동시에 선택
+  async function selectLocation(code) {
+    selectedSido.value = code.slice(0, 2)
+    await updateSggList()
+    selectedSgg.value = code.slice(0, 5)
+    await updateUmdList()
+    selectedUmd.value = code.slice(0, 8)
+  }
 
   return {
     // state

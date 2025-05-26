@@ -154,8 +154,8 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import axios from 'axios'
-import { useLwdCd } from '@/utils/lwdCdUtil'
-import { useKakaoMap } from '@/utils/kakaoMapUtil.js'
+import { useLwdCd } from '@/utils/userLwdCd'
+import { useKakaoMap } from '@/utils/useKakaoMap.js'
 import { useMarker } from '@/utils/userMaker.js'
 
 const {
@@ -177,7 +177,6 @@ const { markersVisibleByType, clustererByType, toggleMarkers, createMarkers } = 
 // JWT 토큰 설정
 const token = localStorage.getItem('authToken')
 if (token) axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-
 // 지도 관련 변수
 const mapContainer = ref(null)
 let map = null
@@ -185,6 +184,8 @@ const isMapLoaded = ref(false)
 const aptNm = ref('') // 아파트 검색 키워드
 const searchApartments = ref([]) // 아파트 목록
 const favoriteApartments = ref([]) // 아파트 목록
+
+const apartments = ref([]) // 아파트 목록
 
 // 관심지역 상태
 const isStarred = ref(false)
@@ -320,9 +321,6 @@ onMounted(async () => {
   try {
     map = await initMap(mapContainer.value)
     if (!map) throw new Error('지도 객체 생성 실패')
-    if (!window.kakao?.maps?.MarkerClusterer) {
-      throw new Error('MarkerClusterer가 아직 로드되지 않았습니다.')
-    }
 
     isMapLoaded.value = true
     // 클러스터 생성
