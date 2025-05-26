@@ -1,6 +1,8 @@
 package com.ssafy.BaeAndChoi.news.scheduler;
 
 import com.ssafy.BaeAndChoi.news.application.NewsCrawlingService;
+import com.ssafy.BaeAndChoi.news.application.NewsService;
+import com.ssafy.BaeAndChoi.news.application.NewsSummaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 public class NewsCrawlScheduler {
 
     private final NewsCrawlingService crawlingService;
+    private final NewsSummaryService newsSummaryService;
     private static final DateTimeFormatter YMD = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     /**
@@ -23,5 +26,8 @@ public class NewsCrawlScheduler {
     public void crawlYesterdayNews() {
         String yesterday = LocalDate.now().format(YMD);
         crawlingService.crawlNewsByDate(yesterday);
+
+        //오늘의 일일 뉴스 요약
+        newsSummaryService.addNewsSummation();
     }
 }
