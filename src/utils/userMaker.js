@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { useKakaoMap } from '@/utils/kakaoMapUtil.js'
+import { useKakaoMap } from '@/utils/useKakaoMap.js'
 
 const { addressToPosition } = useKakaoMap()
 
@@ -52,7 +52,7 @@ export function useMarker() {
           const address = await getPositionFn(item)
           const pos = await addressToPosition(address)
           const loc = new window.kakao.maps.LatLng(pos.latitude, pos.longitude)
-          return new window.kakao.maps.Marker({
+          const marker = new window.kakao.maps.Marker({
             position: loc,
             map: markersVisibleByType[type].value ? map : null,
             ...(options.markerImage && {
@@ -63,6 +63,8 @@ export function useMarker() {
               ),
             }),
           })
+          marker.item = item
+          return marker
         } catch (error) {
           console.error('주소 변환 오류:', error)
           return null
