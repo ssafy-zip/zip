@@ -15,9 +15,17 @@
           <i class="fa-solid fa-search fa-2x"></i>
           <span>검색</span>
         </li>
+        <li class="house-map__sidebar-nav-item" @click="toggleSearchMarkers">
+          <i class="fa-solid fa-location-dot fa-2x"></i>
+          <span>{{ markersVisibleByType.search.value ? '숨기기' : '보이기' }}</span>
+        </li>
         <li class="house-map__sidebar-nav-item">
           <i class="fa-solid fa-heart fa-2x"></i>
           <span>관심</span>
+        </li>
+        <li class="house-map__sidebar-nav-item" @click="toggleFavoriteMarkers">
+          <i class="fa-solid fa-star fa-2x"></i>
+          <span>{{ markersVisibleByType.favorite.value ? '숨기기' : '보이기' }}</span>
         </li>
         <li class="house-map__sidebar-nav-item">
           <i class="fa-solid fa-robot fa-2x"></i>
@@ -148,6 +156,7 @@ import { ref, watch, onMounted } from 'vue'
 import axios from 'axios'
 import { useLwdCd } from '@/utils/lwdCdUtil'
 import { useKakaoMap } from '@/utils/kakaoMapUtil.js'
+import { useMarker } from '@/utils/userMaker.js'
 
 const {
   updateSidoList,
@@ -161,22 +170,21 @@ const {
   getLwdCdFullName,
 } = useLwdCd()
 
-const {
-  DEFAULT_DISPLAY_LEVEL,
-  getCurrentDevicePosition,
-  coordToRegionCode,
-  addressToPosition,
-  initMap,
-} = useKakaoMap()
+const { DEFAULT_DISPLAY_LEVEL, getCurrentDevicePosition, coordToRegionCode, initMap } =
+  useKakaoMap()
+const { markersVisibleByType, clustererByType, toggleMarkers, createMarkers } = useMarker()
+
+// JWT 토큰 설정
+const token = localStorage.getItem('authToken')
+if (token) axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
 
 // 지도 관련 변수
 const mapContainer = ref(null)
 let map = null
 const isMapLoaded = ref(false)
-
-// JWT 토큰 설정
-const token = localStorage.getItem('authToken')
-if (token) axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+const aptNm = ref('') // 아파트 검색 키워드
+const searchApartments = ref([]) // 아파트 목록
+const favoriteApartments = ref([]) // 아파트 목록
 
 // 관심지역 상태
 const isStarred = ref(false)
@@ -221,7 +229,7 @@ async function toggleFavoriteRegion() {
   }
 }
 
-// 카카오맵 초기화
+// 법정동 필터 제어
 async function setLwdCdFilterToMapCenter() {
   if (!map) return
   const center = map.getCenter()
@@ -233,6 +241,7 @@ async function setLwdCdFilter(latitude, longitude) {
   await selectLocation(region.code)
 }
 
+// 지도 위치 제어
 async function moveToCurrentLocation() {
   try {
     const { latitude, longitude } = await getCurrentDevicePosition()
@@ -247,16 +256,10 @@ async function moveToCurrentLocation() {
 }
 
 // 마커 제어
-const markers = []
-
-function clearMarkers() {
-  markers.forEach((marker) => marker.setMap(null))
-  markers.length = 0 // 배열 비우기
-}
+const toggleSearchMarkers = () => toggleMarkers('search', map)
+const toggleFavoriteMarkers = () => toggleMarkers('favorite', map)
 
 // 아파트 검색
-const aptNm = ref('')
-const apartments = ref([])
 async function searchApt() {
   try {
     // 아파트 검색
@@ -266,32 +269,43 @@ async function searchApt() {
         code: selectedUmd.value || selectedSgg.value || selectedSido.value,
       },
     })
-    apartments.value = data
-    // 마커 표식
-    clearMarkers()
-    const markerPromises = apartments.value.map(async (apartment) => {
-      try {
-        const { data: lwdCd } = await axios.get(`/api/lwdCd/${apartment.sggCd + apartment.umdCd}`)
-        const address =
-          getLwdCdFullName(lwdCd) +
-          ' ' +
-          Number(apartment.bonbun) +
-          (Number(apartment.bubun) ? '-' + Number(apartment.bubun) : '')
-
-        const pos = await addressToPosition(address)
-        const loc = new window.kakao.maps.LatLng(pos.latitude, pos.longitude)
-        return new window.kakao.maps.Marker({ position: loc, map: map })
-      } catch (error) {
-        console.error('지역 코드 정보를 가져오는 중 오류 발생:', error)
-        return null
-      }
-    })
-    const results = await Promise.all(markerPromises)
-    results.forEach((marker) => {
-      if (marker) markers.push(marker)
+    searchApartments.value = data
+    // 마커 생성
+    await createMarkers('search', searchApartments, map, async (apt) => {
+      const { data: lwdCd } = await axios.get(`/api/lwdCd/${apt.sggCd + apt.umdCd}`)
+      return getLwdCdFullName(lwdCd) + ' ' + apt.bonbun + (apt.bubun ? '-' + apt.bubun : '')
     })
   } catch (error) {
     console.error('아파트 검색 실패:', error)
+  }
+}
+// 관심 아파트 조회
+async function loadFavoriteApt() {
+  try {
+    // 아파트 검색
+    const { data } = await axios.get('/api/interestHouse/interestHouses')
+    favoriteApartments.value = data
+    // 마커 생성
+    await createMarkers(
+      'favorite',
+      favoriteApartments,
+      map,
+      async (apt) => {
+        const { data: lwdCd } = await axios.get(`/api/lwdCd/${apt.sggCd + apt.umdCd}`)
+        return getLwdCdFullName(lwdCd) + ' ' + apt.bonbun + (apt.bubun ? '-' + apt.bubun : '')
+      },
+      {
+        markerImage: {
+          src: 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
+          size: [30, 40],
+          options: {
+            offset: new window.kakao.maps.Point(15, 40),
+          },
+        },
+      },
+    )
+  } catch (error) {
+    console.error('관심 아파트 조회 실패:', error)
   }
 }
 
@@ -303,8 +317,30 @@ function toggleSidebar() {
 
 onMounted(async () => {
   await updateSidoList()
-  if ((map = await initMap(mapContainer.value))) isMapLoaded.value = true
-  await setLwdCdFilterToMapCenter()
+  try {
+    map = await initMap(mapContainer.value)
+    if (!map) throw new Error('지도 객체 생성 실패')
+    if (!window.kakao?.maps?.MarkerClusterer) {
+      throw new Error('MarkerClusterer가 아직 로드되지 않았습니다.')
+    }
+
+    isMapLoaded.value = true
+    // 클러스터 생성
+    clustererByType.search = new window.kakao.maps.MarkerClusterer({
+      map: map, // 클러스터를 표시할 지도 객체
+      averageCenter: true, // 클러스터 중심을 평균 위치로 설정
+      minLevel: 5, // 클러스터 할 최소 지도 레벨
+    })
+    clustererByType.favorite = new window.kakao.maps.MarkerClusterer({
+      map: map,
+      averageCenter: true,
+      minLevel: 5,
+    })
+    await setLwdCdFilterToMapCenter()
+    await loadFavoriteApt()
+  } catch (err) {
+    console.error('지도 초기화 실패:', err)
+  }
 })
 </script>
 

@@ -8,12 +8,8 @@ const loadKakaoMapScript = async () => {
   if (window.kakao && window.kakao.maps && window.kakao.maps.load) return
   if (!kakaoScriptPromise) {
     kakaoScriptPromise = new Promise((resolve, reject) => {
-      if (document.querySelector('script[src*="dapi.kakao.com"]')) {
-        resolve()
-        return
-      }
       const script = document.createElement('script')
-      script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_JS_KEY}&autoload=false&libraries=services`
+      script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_JS_KEY}&autoload=false&libraries=services,clusterer`
       script.async = true
       script.onload = () => window.kakao.maps.load(resolve)
       script.onerror = () => reject(new Error('Kakao Maps 스크립트 로드 실패'))
