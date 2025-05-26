@@ -83,7 +83,7 @@
                 <option value="" disabled>시/도</option>
                 <option value="x">선택해제</option>
                 <option v-for="s in sidoList" :key="s.code" :value="s.code">
-                  {{ s.sidoName }}
+                  {{ s.sidoName || s.name }}
                 </option>
               </select>
               <i class="fas fa-chevron-right"></i>
@@ -97,7 +97,7 @@
                 <option value="" disabled>시/군/구</option>
                 <option value="x">선택해제</option>
                 <option v-for="g in sggList" :key="g.code" :value="g.code">
-                  {{ g.sggName }}
+                  {{ g.sggName || g.name }}
                 </option>
               </select>
               <i class="fas fa-chevron-right"></i>
@@ -110,7 +110,9 @@
               >
                 <option value="" disabled>읍/면/동</option>
                 <option value="x">선택해제</option>
-                <option v-for="u in umdList" :key="u.code" :value="u.code">{{ u.umdName }}</option>
+                <option v-for="u in umdList" :key="u.code" :value="u.code">
+                  {{ u.umdName || u.name }}
+                </option>
               </select>
 
               <!-- 관심지역 토글 버튼 -->
@@ -202,6 +204,15 @@
           </p>
         </div>
 
+        <!-- 가격 추이 차트 -->
+        <div
+          v-if="selectedApt && selectedApt.deals && selectedApt.deals.length > 1"
+          class="price-chart-section"
+        >
+          <h3>1평당 가격 추이</h3>
+          <div ref="chartRef" class="deal-chart"></div>
+        </div>
+
         <h3>거래 내역</h3>
         <div v-if="!selectedApt.deals || selectedApt.deals.length === 0" class="empty-state">
           거래 내역이 없습니다.
@@ -231,6 +242,8 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import axios from 'axios'
+// 차트 ref 추가
+const chartRef = ref(null)
 
 const useLwdCd = () => {
   const sidoList = ref([])
@@ -480,6 +493,16 @@ const sidebarNavRef = ref(null)
 
 // 관심 아파트 목록
 const favoriteApts = ref(new Set())
+// 선택된 아파트 변경 시 차트 업데이트
+watch(
+  selectedApt,
+  () => {
+    nextTick(() => {
+      createPriceChart()
+    })
+  },
+  { deep: true },
+)
 
 // JWT 토큰 설정
 const token = localStorage.getItem('authToken')
@@ -565,7 +588,76 @@ function clearMarkers() {
   markers.value.length = 0
 }
 
-// 아파트 검색
+// 거래 날짜를 Date 객체로 변환
+function parseDate(deal) {
+  if (!deal.dealYmd) return null
+  const year = deal.dealYmd.substring(0, 4)
+  const month = deal.dealYmd.substring(4, 6)
+  const day = deal.dealDay ? String(deal.dealDay).padStart(2, '0') : '01'
+  return new Date(`${year}-${month}-${day}`)
+}
+
+// 툴팁 표시 함수
+function showTooltip(event, deal) {
+  // 기존 툴팁 제거
+  hideTooltip()
+
+  const tooltip = document.createElement('div')
+  tooltip.id = 'chart-tooltip'
+  tooltip.style.cssText = `
+    position: fixed;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    z-index: 10000;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    max-width: 200px;
+  `
+
+  const pricePerPyeong = Math.round(deal.pricePerPyeong / 10000)
+  const totalPrice = formatPrice(deal.dealAmount)
+
+  tooltip.innerHTML = `
+    <div style="font-weight: bold; margin-bottom: 8px; color: #60a5fa;">
+      ${deal.date.toLocaleDateString('ko-KR')}
+    </div>
+    <div style="margin-bottom: 4px;">
+      <strong>거래가격:</strong> ${totalPrice}만원
+    </div>
+    <div style="margin-bottom: 4px;">
+      <strong>평당가격:</strong> ${pricePerPyeong}만원/평
+    </div>
+    <div style="margin-bottom: 4px;">
+      <strong>전용면적:</strong> ${deal.excluUseAr}㎡ (${Math.round(deal.excluUseAr * 0.3025)}평)
+    </div>
+    <div>
+      <strong>층수:</strong> ${deal.floor}층
+    </div>
+  `
+
+  document.body.appendChild(tooltip)
+
+  // 툴팁 위치 조정
+  const rect = tooltip.getBoundingClientRect()
+  const x = event.clientX + 10
+  const y = event.clientY - rect.height - 10
+
+  tooltip.style.left = Math.min(x, window.innerWidth - rect.width - 10) + 'px'
+  tooltip.style.top = Math.max(y, 10) + 'px'
+}
+
+// 툴팁 숨기기 함수
+function hideTooltip() {
+  const tooltip = document.getElementById('chart-tooltip')
+  if (tooltip) {
+    tooltip.remove()
+  }
+}
+
+// 아파트 검색 (HouseMapView2 방식)
 async function searchApt() {
   isInterestMode.value = false
   isLoading.value = true
@@ -574,10 +666,7 @@ async function searchApt() {
     const { data } = await axios.get('/api/apartments/apt', {
       params: {
         aptNm: aptNm.value,
-        code:
-          selectedUmd.value.slice(5, 10) ||
-          selectedSgg.value.slice(0, 5) ||
-          selectedSido.value.slice(0, 2),
+        code: selectedUmd.value || selectedSgg.value || selectedSido.value,
       },
     })
     apartments.value = data
@@ -684,6 +773,152 @@ async function loadInterestApartments() {
   } finally {
     isLoading.value = false
   }
+}
+
+// 가격 추이 차트 생성
+function createPriceChart() {
+  if (!selectedApt.value || !selectedApt.value.deals || !chartRef.value) return
+
+  // 기존 차트 제거
+  chartRef.value.innerHTML = ''
+
+  const deals = selectedApt.value.deals
+    .filter((deal) => deal.dealYmd && deal.dealAmount && deal.excluUseAr)
+    .map((deal) => ({
+      date: parseDate(deal),
+      pricePerPyeong: calculatePricePerPyeong(deal.dealAmount, deal.excluUseAr),
+      dealAmount: deal.dealAmount,
+      excluUseAr: deal.excluUseAr,
+      floor: deal.floor,
+    }))
+    .filter((deal) => deal.date && deal.pricePerPyeong > 0)
+    .sort((a, b) => a.date - b.date)
+
+  if (deals.length === 0) {
+    chartRef.value.innerHTML = '<div class="empty-chart">가격 추이 데이터가 없습니다.</div>'
+    return
+  }
+
+  // 간단한 SVG 차트 생성
+  const width = 300
+  const height = 200
+  const margin = { top: 20, right: 20, bottom: 40, left: 60 }
+  const chartWidth = width - margin.left - margin.right
+  const chartHeight = height - margin.top - margin.bottom
+
+  const minPrice = Math.min(...deals.map((d) => d.pricePerPyeong))
+  const maxPrice = Math.max(...deals.map((d) => d.pricePerPyeong))
+  const priceRange = maxPrice - minPrice || 1
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  svg.setAttribute('width', width)
+  svg.setAttribute('height', height)
+  svg.style.background = '#f9fafb'
+  svg.style.borderRadius = '8px'
+
+  // 차트 제목
+  const title = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+  title.setAttribute('x', width / 2)
+  title.setAttribute('y', 15)
+  title.setAttribute('text-anchor', 'middle')
+  title.setAttribute('font-size', '12')
+  title.setAttribute('font-weight', 'bold')
+  title.textContent = '1평당 가격 추이'
+  svg.appendChild(title)
+
+  // Y축 라벨 (가격)
+  const yAxisLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+  yAxisLabel.setAttribute('x', 15)
+  yAxisLabel.setAttribute('y', margin.top + chartHeight / 2)
+  yAxisLabel.setAttribute('text-anchor', 'middle')
+  yAxisLabel.setAttribute('font-size', '10')
+  yAxisLabel.setAttribute('transform', `rotate(-90, 15, ${margin.top + chartHeight / 2})`)
+  yAxisLabel.textContent = '만원/평'
+  svg.appendChild(yAxisLabel)
+
+  // 데이터 포인트와 라인 그리기
+  let pathData = ''
+  deals.forEach((deal, index) => {
+    const x = margin.left + (index / (deals.length - 1 || 1)) * chartWidth
+    const y =
+      margin.top + chartHeight - ((deal.pricePerPyeong - minPrice) / priceRange) * chartHeight
+
+    // 라인 패스 데이터
+    if (index === 0) {
+      pathData += `M ${x} ${y}`
+    } else {
+      pathData += ` L ${x} ${y}`
+    }
+
+    // 데이터 포인트
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+    circle.setAttribute('cx', x)
+    circle.setAttribute('cy', y)
+    circle.setAttribute('r', 4)
+    circle.setAttribute('fill', '#2563eb')
+    circle.setAttribute('stroke', '#fff')
+    circle.setAttribute('stroke-width', 2)
+    circle.style.cursor = 'pointer'
+
+    // 호버 효과
+    circle.addEventListener('mouseenter', (e) => {
+      circle.setAttribute('r', 6)
+      circle.setAttribute('fill', '#1d4ed8')
+      showTooltip(e, deal)
+    })
+
+    circle.addEventListener('mouseleave', () => {
+      circle.setAttribute('r', 4)
+      circle.setAttribute('fill', '#2563eb')
+      hideTooltip()
+    })
+
+    svg.appendChild(circle)
+  })
+
+  // 라인 그리기
+  if (pathData) {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+    path.setAttribute('d', pathData)
+    path.setAttribute('stroke', '#2563eb')
+    path.setAttribute('stroke-width', 2)
+    path.setAttribute('fill', 'none')
+    svg.insertBefore(path, svg.firstChild.nextSibling)
+  }
+
+  // Y축 눈금
+  for (let i = 0; i <= 4; i++) {
+    const price = minPrice + (priceRange * i) / 4
+    const y = margin.top + chartHeight - (i / 4) * chartHeight
+
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+    line.setAttribute('x1', margin.left - 5)
+    line.setAttribute('y1', y)
+    line.setAttribute('x2', margin.left)
+    line.setAttribute('y2', y)
+    line.setAttribute('stroke', '#6b7280')
+    line.setAttribute('stroke-width', 1)
+    svg.appendChild(line)
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+    text.setAttribute('x', margin.left - 8)
+    text.setAttribute('y', y + 3)
+    text.setAttribute('text-anchor', 'end')
+    text.setAttribute('font-size', '9')
+    text.setAttribute('fill', '#6b7280')
+    text.textContent = Math.round(price / 10000)
+    svg.appendChild(text)
+  }
+
+  chartRef.value.appendChild(svg)
+}
+
+// 1평당 가격 계산 (1㎡ = 0.3025평)
+function calculatePricePerPyeong(dealAmount, excluUseAr) {
+  if (!dealAmount || !excluUseAr) return 0
+  const price = parseInt(dealAmount.replace(/,/g, '')) * 10000 // 만원을 원으로 변환
+  const pyeong = excluUseAr * 0.3025 // ㎡를 평으로 변환
+  return Math.round(price / pyeong)
 }
 
 // 현재 위치로 이동 (HouseMapView2 방식)
@@ -992,6 +1227,9 @@ onUnmounted(() => {
   document.removeEventListener('mousemove', onDrag)
   document.removeEventListener('mouseup', stopDrag)
 
+  // 툴팁 정리
+  hideTooltip()
+
   if (currentLocationMarker.value) {
     currentLocationMarker.value.setMap(null)
   }
@@ -1003,11 +1241,9 @@ onUnmounted(() => {
   position: relative;
   display: flex;
   overflow: hidden;
-
   flex: 1;
-  height: 100%;
+  height: 100vh;
   width: 100%;
-
   --sidebar-nav-width: 66px;
 }
 
@@ -1155,12 +1391,6 @@ onUnmounted(() => {
   color: #2563eb;
 }
 
-.house-map__search-button::after {
-  content: '';
-  border: 1px solid #ddd;
-  margin-left: 10px;
-}
-
 .house-map__search-filters {
   font-size: 14px;
 }
@@ -1174,17 +1404,22 @@ onUnmounted(() => {
 
 .house-map__selete_current_position_button {
   margin: 0;
-  padding: 0;
+  padding: 2px;
   background: none;
   border: 2px solid #cccccc;
   border-radius: 8px;
-  padding: 2px;
   cursor: pointer;
   font-size: 20px;
+  transition: all 0.2s;
 }
 
 .house-map__selete_current_position_button:hover {
   background-color: #e5e7eb;
+}
+
+.house-map__selete_current_position_button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .house-map__search-filter-wrapper {
@@ -1202,6 +1437,13 @@ onUnmounted(() => {
   cursor: pointer;
   text-align: center;
   font-size: 14px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.house-map__search-selectBox:hover {
+  background-color: #f9fafb;
 }
 
 .house-map__favorite-button {
@@ -1221,7 +1463,7 @@ onUnmounted(() => {
   color: #fbbf24;
 }
 
-/* 아파트 검색 결과 (HouseMapView2 스타일) */
+/* 아파트 검색 결과 */
 .house-map__sidebar-thread {
   flex: 1;
   overflow-y: scroll;
@@ -1264,10 +1506,6 @@ onUnmounted(() => {
   padding-left: 10px;
   font-size: 14px;
   color: #374151;
-}
-
-.house-map__apt-info-favorite {
-  align-self: flex-end;
 }
 
 /* 아파트 상세 정보 */
@@ -1347,5 +1585,73 @@ onUnmounted(() => {
 .no-deals {
   color: #6b7280;
   font-style: italic;
+}
+
+/* FontAwesome 아이콘 대체 */
+.fa-solid:before,
+.fas:before {
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+}
+
+.fa-crosshairs:before {
+  content: '⊕';
+}
+.fa-search:before {
+  content: '🔍';
+}
+.fa-heart:before {
+  content: '♥';
+}
+.fa-robot:before {
+  content: '🤖';
+}
+.fa-ellipsis-h:before {
+  content: '⋯';
+}
+.fa-times:before {
+  content: '✕';
+}
+.fa-chevron-right:before {
+  content: '▶';
+}
+.fa-star:before {
+  content: '★';
+}
+.fa-spinner:before {
+  content: '⟳';
+}
+.fa-spin {
+  animation: fa-spin 2s infinite linear;
+}
+
+@keyframes fa-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(359deg);
+  }
+}
+
+.price-chart-section {
+  margin-top: 16px;
+}
+
+.deal-chart {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.empty-chart {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+  font-style: italic;
+  background: #f9fafb;
+  border-radius: 8px;
 }
 </style>
