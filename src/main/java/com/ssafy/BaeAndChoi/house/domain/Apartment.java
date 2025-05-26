@@ -82,6 +82,9 @@ public class Apartment {
     @Column(name = "land_cd", length = 10)
     private String landCd;
 
+    @Column(name="img")
+    private String img;
+
     /** 거래내역 (1:N) */
     @OneToMany(mappedBy = "apartment", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
