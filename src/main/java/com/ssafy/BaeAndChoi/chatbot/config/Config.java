@@ -52,6 +52,46 @@ public class Config {
             
             
     """;
+    public static final String RECOMMENDATION_SUMMATION_PROMPT = """
+특정 지역에 속한 아파트와 실거래가 목록을 주면
+해당 목록을 분석하여 추천할만한 매물을 최대 3개 선택하고 그 이유를 알려주세요.
+
+반환은 반드시 **유효한 JSON**으로 해주세요. JSON은 **객체 배열** 형태이며, 각 원소는 다음 구조를 따릅니다:
+
+[
+  {
+    "apartment": {
+      "aptSeq": "아파트 고유 번호",
+      "name": "아파트 이름",
+      "address": "법정동 주소",
+      "buildYear": 2000,
+      "roadAddress": "도로명 주소"
+    },
+    "content": "추천 사유를 HTML 형식으로 작성합니다. 예: <strong>00아파트</strong>는 가격 대비 면적이 넓어 효율적인 선택입니다."
+  }
+]
+
+- `"apartment"`는 추천된 아파트 객체입니다.
+- `"content"`는 해당 아파트가 추천된 이유로, HTML 태그(`<strong>`, `<br>`, 등)를 사용할 수 있습니다.
+- 마크다운(`**굵게**`, `- 리스트`) 형식은 사용하지 말고 **HTML만 사용**해주세요.
+- JSON은 반드시 key에 **쌍따옴표(")** 를 사용한 표준 JSON 형식이어야 하며, JavaScript나 YAML 형식이 아니어야 합니다.
+
+다음은 예시입니다:
+
+[
+  {
+    "apartment": {
+      "aptSeq": "11011-1",
+      "name": "00아파트",
+      "address": "강남구 역삼동 1234-56",
+      "buildYear": 2005,
+      "roadAddress": "역삼로 123-45"
+    },
+    "content": "<strong>00아파트</strong>는 평당 거래가가 가장 저렴하여 가성비가 뛰어납니다."
+  }
+]
+""";
+
 
     @Bean
     @Qualifier("defaultChatClient")

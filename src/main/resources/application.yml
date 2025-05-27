@@ -79,3 +79,14 @@ server:
 API:
   #  key: eq3Do1yF57fqENuUSWwSlibvbOtmwRIgJLStRfGz%2BK1CqY6rKvCGH7vfXUZmXgmv0XWVGa7kGz7W0Cnz5EKA4w%3D%3D
   key: SECRET_EXTERNAL_API_KEY
+cloud:
+  aws:
+    credentials:
+      access-key: SECRET_AWS_ACCESS_KEY
+      secret-key: SECRET_AWS_SECRET_KEY
+    s3:
+      bucket: yaguhang-bucket
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
