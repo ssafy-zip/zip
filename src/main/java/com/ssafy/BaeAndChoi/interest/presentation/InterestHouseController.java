@@ -51,7 +51,6 @@ public class InterestHouseController {
             return ResponseEntity.ok((Collections.emptyList()));
         }
         String userId = userDetails.getUsername();
-
         return ResponseEntity.ok(interestHouseService.getInterestApartments(userId, aptName, si, gun, gu));
     }
 
