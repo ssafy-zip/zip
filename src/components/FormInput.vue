@@ -1,7 +1,7 @@
 <template>
   <div class="form-group">
     <label class="form-label">
-      <i :class="['fa-solid', icon, 'fa-2x']"></i>
+      <i :class="['fas', icon, 'fa-2x']"></i>
     </label>
     <div class="input-wrapper">
       <input

@@ -16,7 +16,7 @@
       />
 
       <div v-show="valid" class="input-valid">
-        <i class="fa-solid fa-check"></i>
+        <i class="fas fa-check"></i>
       </div>
 
       <!-- clear 버튼 -->
@@ -27,7 +27,7 @@
         @click="proxyValue = ''"
         aria-label="입력 지우기"
       >
-        <i class="fa-solid fa-xmark"></i>
+        <i class="fas fa-xmark"></i>
       </button>
 
       <!-- 비밀번호 보기/숨기기 -->
@@ -39,7 +39,7 @@
         aria-label="비밀번호 보기/숨기기"
         :title="showPassword ? '비밀번호 숨기기' : '비밀번호 보기'"
       >
-        <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+        <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
       </button>
 
       <!-- slot 삽입도 가능 -->

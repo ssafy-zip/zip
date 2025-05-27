@@ -3,7 +3,7 @@
     :visible="visible"
     @close="close"
     title="휴대폰 번호"
-    :icon="['fa-solid', 'fa-phone', 'fa-3x']"
+    :icon="['fas', 'fa-phone', 'fa-3x']"
     description="휴대폰 번호를 입력하세요."
   >
     <form @submit.prevent="submit" class="modal__form">

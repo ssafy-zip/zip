@@ -3,7 +3,7 @@
     :visible="visible"
     @close="close"
     title="비밀번호"
-    :icon="['fa-solid', 'fa-lock', 'fa-3x']"
+    :icon="['fas', 'fa-lock', 'fa-3x']"
     description="비밀번호를 입력하세요."
   >
     <form @submit.prevent="submit" class="modal__form">

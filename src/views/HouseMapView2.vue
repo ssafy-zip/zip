@@ -4,35 +4,35 @@
     <nav class="house-map__sidebar-nav">
       <ul class="house-map__sidebar-nav-list">
         <li class="house-map__sidebar-nav-item" @click="toggleSidebar">
-          <i class="fa-solid fa-bars fa-2x"></i>
+          <i class="fas fa-bars fa-2x"></i>
           <span>{{ openSidebar ? '닫기' : '열기' }}</span>
         </li>
         <li class="house-map__sidebar-nav-item" @click="moveToCurrentLocation">
-          <i class="fa-solid fa-crosshairs fa-2x"></i>
+          <i class="fas fa-crosshairs fa-2x"></i>
           <span>내 위치</span>
         </li>
         <li class="house-map__sidebar-nav-item">
-          <i class="fa-solid fa-search fa-2x"></i>
+          <i class="fas fa-search fa-2x"></i>
           <span>검색</span>
         </li>
         <li class="house-map__sidebar-nav-item" @click="toggleSearchMarkers">
-          <i class="fa-solid fa-location-dot fa-2x"></i>
+          <i class="fas fa-location-dot fa-2x"></i>
           <span>{{ markersVisibleByType.search.value ? '숨기기' : '보이기' }}</span>
         </li>
         <li class="house-map__sidebar-nav-item">
-          <i class="fa-solid fa-heart fa-2x"></i>
+          <i class="fas fa-heart fa-2x"></i>
           <span>관심</span>
         </li>
         <li class="house-map__sidebar-nav-item" @click="toggleFavoriteMarkers">
-          <i class="fa-solid fa-star fa-2x"></i>
+          <i class="fas fa-star fa-2x"></i>
           <span>{{ markersVisibleByType.favorite.value ? '숨기기' : '보이기' }}</span>
         </li>
         <li class="house-map__sidebar-nav-item">
-          <i class="fa-solid fa-robot fa-2x"></i>
+          <i class="fas fa-robot fa-2x"></i>
           <span>AI 검색</span>
         </li>
         <li class="house-map__sidebar-nav-item">
-          <i class="fa-solid fa-ellipsis-h fa-2x"></i>
+          <i class="fas fa-ellipsis-h fa-2x"></i>
           <span>더보기</span>
         </li>
       </ul>
@@ -94,7 +94,7 @@
               <!-- 관심지역 토글 버튼 -->
               <button class="house-map__favorite-button" @click="toggleFavoriteRegion">
                 <i
-                  class="fa-solid fa-star house-map__favorite-button-icon"
+                  class="fas fa-star house-map__favorite-button-icon"
                   :class="{ starred: isStarred }"
                 ></i>
               </button>
@@ -129,7 +129,7 @@
                     <span> 거래 이력 수: {{ item.deals.length }} </span>
                     <button class="house-map__favorite-button">
                       <i
-                        class="fa-solid fa-star house-map__favorite-button-icon"
+                        class="fas fa-star house-map__favorite-button-icon"
                         :class="{ starred: false }"
                       ></i>
                     </button>
@@ -154,9 +154,9 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import baseURL from '@/baseURL'
-import { useLwdCd } from '@/utils/userLwdCd'
+import { useLwdCd } from '@/utils/useLwdCd'
 import { useKakaoMap } from '@/utils/useKakaoMap.js'
-import { useMarker } from '@/utils/userMaker.js'
+import { useMarker } from '@/utils/useMaker.js'
 
 const {
   updateSidoList,

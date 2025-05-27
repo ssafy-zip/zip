@@ -29,7 +29,7 @@
           <option value="comments">댓글순</option>
         </select>
         <button class="bbs__write-button" @click="handleWrite">
-          <i class="fa-solid fa-pen-to-square"></i> &nbsp; 글쓰기
+          <i class="fas fa-pen-to-square"></i> &nbsp; 글쓰기
         </button>
       </div>
     </div>
@@ -85,7 +85,7 @@
     <!-- 페이지네이션 -->
     <div class="bbs__pagination">
       <button class="bbs__page-button" @click="prevPage">
-        <i class="fa-solid fa-chevron-left"></i>
+        <i class="fas fa-chevron-left"></i>
       </button>
       <button
         v-for="page in totalPages"
@@ -96,7 +96,7 @@
         {{ page + 1 }}
       </button>
       <button class="bbs__page-button" @click="nextPage">
-        <i class="fa-solid fa-chevron-right"></i>
+        <i class="fas fa-chevron-right"></i>
       </button>
     </div>
   </div>
@@ -202,8 +202,6 @@ onMounted(fetchPosts)
 </script>
 
 <style scoped>
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
-
 .bbs {
   min-width: 600px;
   max-width: 1000px;

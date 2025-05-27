@@ -1,97 +1,98 @@
 <template>
   <section class="house-map">
-    <!-- 첫 번째 사이드바: 네비게이션 아이콘 -->
-    <nav
-      ref="sidebarNavRef"
-      class="house-map__sidebar-nav"
-      :class="{ dragging: isDragging }"
-      :style="{
-        left: sidebarPosition.x + 'px',
-        top: sidebarPosition.y + 'px',
-        cursor: isDragging ? 'grabbing' : 'grab',
-      }"
-      @mousedown="startDrag"
-    >
+    <!-- 사이드바 네비게이션 -->
+    <nav class="house-map__sidebar-nav">
       <ul class="house-map__sidebar-nav-list">
-        <!--내 위치-->
-        <li class="house-map__sidebar-nav-item" @click="moveToCurrentLocation">
-          <i class="fa-solid fa-crosshairs fa-lg"></i>
-          <span>내 위치</span>
-        </li>
-        <!--검색-->
-        <li class="house-map__sidebar-nav-item" @click="toggleSearchSidebar">
-          <i class="fa-solid fa-search fa-lg"></i>
-          <span>검색</span>
-        </li>
-        <!--검색 마커-->
         <li
           class="house-map__sidebar-nav-item"
+          :class="{ active: isSelectedSearch }"
+          @click="toggleSearchSidebar"
+        >
+          <i class="fas fa-search fa-2x"></i>
+          <span class="house-map__sidebar-nav-item-label">검색</span>
+        </li>
+        <li
+          class="house-map__sidebar-nav-item"
+          :class="{ active: isSelectedFavorite }"
+          @click="toggleFavoriteSidebar"
+        >
+          <i class="fas fa-star fa-2x"></i>
+          <span class="house-map__sidebar-nav-item-label">관심</span>
+        </li>
+      </ul>
+    </nav>
+    <!-- 리모컨 -->
+    <nav class="house-map__remote-control">
+      <ul class="house-map__remote-control-list">
+        <li class="house-map__remote-control-item" @click="moveToCurrentLocation">
+          <i class="fas fa-location-crosshairs fa-2x"></i>
+          <span class="house-map__remote-control-item-label">내 위치</span>
+        </li>
+        <li
+          class="house-map__remote-control-item"
+          :class="{ active: markersVisibleByType.search.value }"
           @click="toggleSearchMarkers"
-          :style="{
-            color: markersVisibleByType.search.value ? 'green' : 'red',
-          }"
         >
-          <i class="fa-solid fa-location-dot fa-lg"></i>
-          <span>검색 마커</span>
+          <i
+            class="fas fa-2x"
+            :class="{
+              'fa-location-dot': markersVisibleByType.search.value,
+              'fa-location-pin': !markersVisibleByType.search.value,
+            }"
+          ></i>
+          <span class="house-map__remote-control-item-label"> 마커 </span>
         </li>
-        <!--관심 등록 보기-->
-        <li class="house-map__sidebar-nav-item" @click="toggleFavoriteSidebar">
-          <i class="fa-solid fa-heart fa-lg"></i>
-          <span>관심</span>
-        </li>
-        <!--관심 마커-->
         <li
-          class="house-map__sidebar-nav-item"
+          class="house-map__remote-control-item"
+          :class="{ active: markersVisibleByType.favorite.value }"
           @click="toggleFavoriteMarkers"
-          :style="{
-            color: markersVisibleByType.favorite.value ? 'green' : 'red',
-          }"
         >
-          <i class="fa-solid fa-star fa-lg"></i>
-          <span>관심 마커</span>
+          <i
+            class="fa-star fa-2x"
+            :class="{
+              fas: markersVisibleByType.favorite.value,
+              far: !markersVisibleByType.favorite.value,
+            }"
+          ></i>
+          <span class="house-map__remote-control-item-label">관심 </span>
         </li>
       </ul>
     </nav>
 
-    <!-- 두 번째 사이드바: 검색 및 아파트 목록 -->
-    <aside :class="['sidebar', 'search-sidebar', { active: showLeftSidebar }]">
-      <div class="sidebar-header">
-        <h2>{{ isFavoriteTap ? '관심 아파트' : '매물 검색' }}</h2>
-        <button class="close-btn" @click="closeLeftSidebar">
-          <i class="fa-solid fa-times"></i>
-        </button>
-      </div>
-
-      <!-- 검색 헤더 -->
-      <section class="house-map__search">
+    <!--사이드바-->
+    <aside class="house-map__sidebar house-map__sidebar-left" :class="{ active: showLeftSidebar }">
+      <!-- 검색 영역 -->
+      <section class="house-map__search-container">
+        <!--검색 상자-->
         <article class="house-map__sidebar-search-box">
-          <div class="house-map__search-input-wrapper">
+          <label for="house-map__siderbar-search-keyword" class="house-map__search-input-wrapper">
             <button class="house-map__search-button" @click="searchApt">
               <i class="fas fa-search"></i>
             </button>
             <input
+              id="house-map__siderbar-search-keyword"
               type="text"
               placeholder="검색"
               v-model="aptNm"
               @keydown.enter="searchApt"
               class="house-map__search-keyword"
             />
-          </div>
+          </label>
         </article>
 
-        <!-- 검색 필터 및 관심 지역 -->
+        <!-- 검색 필터 -->
         <article class="house-map__search-filters">
           <div class="house-map__search-filter-header">
-            <!-- 내 위치로 지정 -->
+            <!-- 현위치로 법정동 지정 -->
             <button
-              class="house-map__select_current_position_button"
+              class="house-map__set-map-center-button"
               @click="setLwdCdFilterToMapCenter"
               :disabled="isMyLocationLoading"
             >
-              <i class="fas fa-crosshairs" :class="{ 'fa-spin': isMyLocationLoading }"></i>
+              <i class="fas fa-location-crosshairs" :class="{ 'fa-spin': isMyLocationLoading }"></i>
             </button>
             <!-- 법정동 필터 -->
-            <div class="house-map__search-filter-wrapper">
+            <div class="house-map__search-lwdCd-wrapper">
               <!-- 시/도 선택 -->
               <select
                 class="house-map__search-selectBox"
@@ -127,15 +128,14 @@
                 <option value="">읍/면/동</option>
                 <option v-for="u in umdList" :key="u.code" :value="u.code">{{ u.name }}</option>
               </select>
-
-              <!-- 관심지역 토글 버튼 -->
-              <button class="house-map__favorite-button" @click="toggleFavoriteRegion">
-                <i
-                  class="fa-solid fa-star house-map__favorite-button-icon"
-                  :class="{ starred: isStarred }"
-                ></i>
-              </button>
             </div>
+            <!-- 관심지역 토글 버튼 -->
+            <button class="house-map__favorite-button" @click="toggleFavoriteRegion">
+              <i
+                class="fas fa-star house-map__favorite-button-icon"
+                :class="{ starred: isStarred }"
+              ></i>
+            </button>
           </div>
         </article>
       </section>
@@ -144,21 +144,28 @@
       <section class="house-map__sidebar-thread">
         <div class="house-map__sidebar-thread-container">
           <article v-if="isListLoading" class="loading-indicator">
-            <span> <i class="fa-solid fa-spinner fa-spin fa-2x"></i></span>
+            <span> <i class="fas fa-spinner fa-spin fa-2x"></i></span>
           </article>
-          <articel v-else-if="isFavoriteTap && favoriteApartments.length == 0" class="empty-state">
-            <p>관심 등록된 아파트가 없습니다. 아파트 검색 후 관심 등록해보세요.</p>
-          </articel>
-          <articel v-else-if="!isFavoriteTap && searchApartments.length == 0" class="empty-state">
-            <p>검색 결과가 없습니다. 다른 지역이나 키워드로 검색해보세요.</p>
-          </articel>
+          <article
+            v-else-if="isSelectedFavorite && favoriteApartments.length == 0"
+            class="empty-state"
+          >
+            <p v-html="'관심 등록된 아파트가 없습니다.<br> 아파트 검색 후 관심 등록해보세요.'"></p>
+          </article>
+          <article v-else-if="isSelectedSearch && searchApartments.length == 0" class="empty-state">
+            <p v-html="'검색 결과가 없습니다.<br> 다른 지역이나 키워드로 검색해보세요.'"></p>
+          </article>
           <article
             v-else
             class="house-map__apt-info"
-            v-for="item in isFavoriteTap ? favoriteApartments : searchApartments"
+            v-for="item in leftTap === 'favorite' ? favoriteApartments : searchApartments"
             :key="item.aptSeq"
           >
-            <div class="house-map__apt-info-container" @click="selectApt(item)">
+            <div
+              class="house-map__apt-info-container"
+              @click="selectApt(item)"
+              @mouseover="moveToLocaation(item.latitude, item.longitude)"
+            >
               <div class="house-map__apt-info-title">{{ item.aptNm }}</div>
               <ul class="house-map__apt-info-detail">
                 <li v-if="item.deals && item.deals.length">
@@ -186,7 +193,7 @@
                       @click.stop="toggleAptFavorite(item)"
                     >
                       <i
-                        class="fa-solid fa-star house-map__favorite-button-icon"
+                        class="fas fa-star house-map__favorite-button-icon"
                         :class="{ starred: isAptFavorite(item.aptSeq) }"
                       ></i>
                     </button>
@@ -200,17 +207,19 @@
     </aside>
 
     <!-- 세 번째 사이드바: 아파트 상세 정보 -->
-    <aside :class="['sidebar', 'detail-sidebar', { active: showRightSidebar }]">
+    <aside
+      :class="['house-map__sidebar', 'house-map__sidebar-right', { active: showRightSidebar }]"
+    >
       <div class="sidebar-header">
         <h2>{{ selectedApt ? selectedApt.aptNm : '아파트 정보' }}</h2>
         <button class="close-btn" @click="closeRightSidebar">
-          <i class="fa-solid fa-times"></i>
+          <i class="fas fa-times"></i>
         </button>
       </div>
 
       <div v-if="selectedApt" class="apartment-detail">
         <div class="apartment-info">
-          <p><strong>주소:</strong> {{ selectedApt.jibun || '정보 없음' }}</p>
+          <p><strong>주소:</strong> {{ selectedAptAddress || '정보 없음' }}</p>
           <p><strong>건축년도:</strong> {{ selectedApt.buildYear || '정보 없음' }}년</p>
           <p v-if="selectedApt.deals && selectedApt.deals.length">
             <strong>가격대:</strong> {{ formatPrice(minPrice(selectedApt)) }} -
@@ -257,17 +266,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, onMounted, computed, watch, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import baseURL from '@/baseURL'
-// 차트 ref 추가
-const chartRef = ref(null)
-import { useLwdCd } from '@/utils/userLwdCd'
+import { useLwdCd } from '@/utils/useLwdCd'
 import { useKakaoMap } from '@/utils/useKakaoMap'
-import { useMarker } from '@/utils/userMaker.js'
+import { useMarker } from '@/utils/useMaker.js'
+
+const router = useRouter()
 
 // JWT 토큰 설정
 const token = localStorage.getItem('authToken')
 if (token) baseURL.defaults.headers.common['Authorization'] = `Bearer ${token}`
+
+// 차트 ref 추가
+const chartRef = ref(null)
 
 const {
   updateSidoList,
@@ -296,28 +309,36 @@ const isMapLoaded = ref(false) // 지도
 const isMyLocationLoading = ref(false) // my-location
 const isListLoading = ref(false) // 검색/관심 목록
 
-// 검색어
-const aptNm = ref('')
-
 // 사이드바 관리
 const showLeftSidebar = ref(false) // 좌측: 검색/관심 목록
 const showRightSidebar = ref(false) // 우측: 상세 조회
-const isFavoriteTap = ref(false) // 좌측 사이드바 탭 상태
+const leftTap = ref('') // 좌측 사이드바 탭 상태
+
+// 사이드바 상태
+const isSelectedSearch = computed(() => showLeftSidebar.value && leftTap.value === 'search')
+const isSelectedFavorite = computed(() => showLeftSidebar.value && leftTap.value === 'favorite')
+
+// 검색어
+const aptNm = ref('')
 
 // 아파트 목록 및 선택된 아파트
 const selectedApt = ref(null)
+const selectedAptAddress = ref('')
+watch(selectedApt, async (cv) => {
+  if (!cv) selectedAptAddress.value = ''
+  const { sggCd, umdCd, bonbun, bubun } = selectedApt.value
+  const { data: lwdCd } = await baseURL.get(`/api/lwdCd/${sggCd + umdCd}`)
+  selectedAptAddress.value =
+    (await getLwdCdFullName(lwdCd)) +
+    ' ' +
+    Number(bonbun) +
+    (Number(bubun) ? '-' + Number(bubun) : '')
+  console.log('selectedAptAddress', selectedAptAddress.value)
+})
 
-// 찜 상태
-const isStarred = ref(false)
-
-// 관심 아파트 목록
-const favoriteApts = ref(new Set())
-
-// 드래그 관련 상태
-const isDragging = ref(false)
-const dragOffset = ref({ x: 0, y: 0 })
-const sidebarPosition = ref({ x: 16, y: 16 })
-const sidebarNavRef = ref(null)
+// 관심 아이템 관리
+const isStarred = ref(false) // 관심 지역
+const favoriteApts = ref(new Set()) // 관심 아파트
 
 watch(
   selectedApt,
@@ -328,60 +349,29 @@ watch(
   },
   { deep: true },
 )
-// 선택된 읍/면/동 변경 시 관심 지역 여부 조회
-watch(
-  selectedUmd,
-  async (newCode) => {
-    if (!newCode) {
-      isStarred.value = false
-      return
-    }
-    try {
-      const { data } = await baseURL.get('/api/interestRegion/isInterestRegion', {
-        params: { lwdCd: newCode + '00' },
-      })
-      const clean = String(data).trim().replace(/^"|"$/g, '')
-      isStarred.value = clean.toLowerCase() === 'true'
-    } catch {
-      isStarred.value = false
-    }
-  },
-  { immediate: true },
-)
 
 /* 사이드바 제어 */
-// 좌측 사이드바 닫기
-function closeLeftSidebar() {
-  showLeftSidebar.value = false
-}
-
 // 좌측 사이드바 검색 탭 토글
 async function toggleSearchSidebar() {
-  if (!showLeftSidebar.value) {
-    showLeftSidebar.value = true
+  if (showLeftSidebar.value && leftTap.value === 'search') {
+    showLeftSidebar.value = false
+    leftTap.value = ''
   } else {
-    if (isFavoriteTap.value) {
-      isFavoriteTap.value = false
-    } else {
-      showLeftSidebar.value = false // 검색 다이얼로그일 때만 닫음
-      return
-    }
+    showLeftSidebar.value = true
+    leftTap.value = 'search'
+    searchApt()
   }
-  searchApt()
 }
 // 좌측 사이드바 관심 탭 토글
 async function toggleFavoriteSidebar() {
-  if (!showLeftSidebar.value) {
-    showLeftSidebar.value = true
+  if (showLeftSidebar.value && leftTap.value === 'favorite') {
+    showLeftSidebar.value = false
+    leftTap.value = ''
   } else {
-    if (isFavoriteTap.value) {
-      showLeftSidebar.value = false // 관심 다이얼로그일 때만 닫음
-      return
-    } else {
-      isFavoriteTap.value = true
-    }
+    showLeftSidebar.value = true
+    leftTap.value = 'favorite'
+    loadFavoriteApartments()
   }
-  loadFavoriteApartments()
 }
 // 우측 사이드바 열기
 function openRightSidebar() {
@@ -410,7 +400,7 @@ const toggleFavoriteMarkers = () => toggleMarkers('favorite', map)
 /* 아파트 조회 */
 // 아파트 검색
 async function searchApt() {
-  isFavoriteTap.value = false
+  leftTap.value = 'search'
   isListLoading.value = true
 
   try {
@@ -418,7 +408,8 @@ async function searchApt() {
     const { data } = await baseURL.get('/api/apartments/apt', {
       params: {
         aptNm: aptNm.value.trim(),
-        code: selectedUmd.value || selectedSgg.value || selectedSido.value,
+        // code: selectedUmd.value || selectedSgg.value || selectedSido.value || '',
+        code: selectedUmd.value || selectedSgg.value || '',
       },
     })
     searchApartments.value = data
@@ -447,6 +438,14 @@ async function searchApt() {
   } finally {
     isListLoading.value = false
   }
+  await loadFavoriteApartments()
+}
+// 지역으로 검색
+async function searchAptByLwdCd() {
+  const cached = aptNm.value
+  // aptNm.value = ''
+  searchApt()
+  aptNm.value = cached
 }
 
 // 관심 아파트 검색
@@ -454,21 +453,23 @@ async function loadFavoriteApartments() {
   const token = localStorage.getItem('authToken')
   if (!token) {
     alert('로그인 후 이용 가능합니다.')
+    router.push({ name: 'Login' })
     return
   }
 
   isListLoading.value = true
   try {
     const params = {}
-    const code = selectedUmd.value || selectedSgg.value || selectedSido.value
+    // const code = selectedUmd.value || selectedSgg.value || selectedSido.value || ''
+    const code = selectedUmd.value || selectedSgg.value || ''
 
     if (aptNm.value.trim()) params.aptName = aptNm.value.trim()
-    if (code == 2 || code == 5 || code == 8 || code == 10) {
-      if (code >= 2) params.si = code.value.slice(0, 2)
-      if (code >= 5) params.gun = code.value.slice(2, 5)
-      if (code >= 8) params.gu = code.value.slice(5, 8)
+    const codeLength = code.length
+    if (codeLength == 2 || codeLength == 5 || codeLength == 8 || codeLength == 10) {
+      if (codeLength >= 2) params.si = code.slice(0, 2)
+      if (codeLength >= 5) params.gun = code.slice(2, 5)
+      if (codeLength >= 8) params.gu = code.slice(5, 8)
     }
-
     const { data } = await baseURL.get('/api/interestHouse/interestHouses', {
       headers: { Authorization: `Bearer ${token}` },
       params,
@@ -491,10 +492,11 @@ async function loadFavoriteApartments() {
             offset: new window.kakao.maps.Point(15, 40),
           },
         },
+        zIndex: 10,
       },
     )
 
-    markersByType.search.forEach((marker) => {
+    markersByType.favorite.forEach((marker) => {
       // 마커/아파트에 추가 정보 할당
       const apartment = marker.item
       marker.setTitle(apartment.aptNm)
@@ -511,6 +513,51 @@ async function loadFavoriteApartments() {
     console.error('관심 아파트 목록 로드 실패:', error)
   } finally {
     isListLoading.value = false
+  }
+}
+
+/* 관심 지역 제어 */
+// 선택한 법정동이 관심 지역인지 확인
+watch(
+  selectedUmd,
+  async (newCode) => {
+    if (!newCode) {
+      isStarred.value = false
+      return
+    }
+    try {
+      const { data } = await baseURL.get('/api/interestRegion/isInterestRegion', {
+        params: { lwdCd: newCode + '00' },
+      })
+      const clean = String(data).trim().replace(/^"|"$/g, '')
+      isStarred.value = clean.toLowerCase() === 'true'
+    } catch {
+      isStarred.value = false
+    }
+  },
+  { immediate: true },
+)
+// 관심지역 토글
+async function toggleFavoriteRegion() {
+  if (!token) {
+    alert('로그인 해주세요.')
+    router.push({ name: 'Login' })
+    return
+  }
+  if (!selectedUmd.value) return
+
+  try {
+    if (isStarred.value) {
+      await baseURL.delete('/api/interestRegion', {
+        params: { lwdCd: selectedUmd.value + '00' },
+      })
+      isStarred.value = false
+    } else {
+      await baseURL.post('/api/interestRegion', { lwdCd: selectedUmd.value + '00' })
+      isStarred.value = true
+    }
+  } catch (error) {
+    console.error('관심지역 업데이트 실패:', error)
   }
 }
 
@@ -729,19 +776,6 @@ function calculatePricePerPyeong(dealAmount, excluUseAr) {
   return Math.round(price / pyeong)
 }
 
-// 지역으로 검색
-async function searchByRegion() {
-  if (selectedUmd.value === '') {
-    return
-  }
-
-  if (isFavoriteTap.value) {
-    loadFavoriteApartments()
-  } else {
-    searchApt()
-  }
-}
-
 /* 지도 이동 제어 */
 // 기기의 현재 위치로 이동
 async function moveToCurrentLocation() {
@@ -798,27 +832,7 @@ async function onSidoChanged() {}
 async function onSggChanged() {}
 // 읍/면/동 변경 처리
 async function onUmdChanged() {
-  if (selectedUmd.value) searchByRegion()
-}
-
-// 관심지역 토글 (HouseMapView2 방식)
-async function toggleFavoriteRegion() {
-  if (!token) return alert('로그인 해주세요.')
-  if (!selectedUmd.value) return
-
-  try {
-    if (isStarred.value) {
-      await baseURL.delete('/api/interestRegion', {
-        params: { lwdCd: selectedUmd.value + '00' },
-      })
-      isStarred.value = false
-    } else {
-      await baseURL.post('/api/interestRegion', { lwdCd: selectedUmd.value + '00' })
-      isStarred.value = true
-    }
-  } catch (error) {
-    console.error('관심지역 업데이트 실패:', error)
-  }
+  if (selectedUmd.value) searchAptByLwdCd()
 }
 
 // 아파트 관심 등록 여부 확인
@@ -846,6 +860,7 @@ async function toggleAptFavorite(apt) {
   const token = localStorage.getItem('authToken')
   if (!token) {
     alert('로그인 후 이용 가능합니다.')
+    router.push({ name: 'Login' })
     return
   }
 
@@ -887,40 +902,6 @@ async function checkFavoriteStatusForApartments(apts) {
       favoriteApts.value.add(apt.aptSeq)
     }
   }
-}
-
-// 드래그 관련 함수들
-function startDrag(event) {
-  isDragging.value = true
-  const rect = sidebarNavRef.value.getBoundingClientRect()
-  dragOffset.value = {
-    x: event.clientX - rect.left,
-    y: event.clientY - rect.top,
-  }
-  document.addEventListener('mousemove', onDrag)
-  document.addEventListener('mouseup', stopDrag)
-  event.preventDefault()
-}
-
-function onDrag(event) {
-  if (!isDragging.value) return
-
-  const newX = event.clientX - dragOffset.value.x
-  const newY = event.clientY - dragOffset.value.y
-
-  const maxX = window.innerWidth - 80
-  const maxY = window.innerHeight - 200
-
-  sidebarPosition.value = {
-    x: Math.max(0, Math.min(newX, maxX)),
-    y: Math.max(0, Math.min(newY, maxY)),
-  }
-}
-
-function stopDrag() {
-  isDragging.value = false
-  document.removeEventListener('mousemove', onDrag)
-  document.removeEventListener('mouseup', stopDrag)
 }
 
 // 유틸리티 함수들
@@ -969,118 +950,151 @@ onMounted(async () => {
     const clustererOptions = {
       map: map, // 클러스터를 표시할 지도 객체
       averageCenter: true, // 클러스터 중심을 평균 위치로 설정
-      minLevel: DEFAULT_DISPLAY_LEVEL + 3, // 클러스터 할 최소 지도 레벨
+      minLevel: DEFAULT_DISPLAY_LEVEL + 1, // 클러스터 할 최소 지도 레벨
     }
     clustererByType.search = new window.kakao.maps.MarkerClusterer(clustererOptions)
-    clustererByType.favorite = new window.kakao.maps.MarkerClusterer(clustererOptions)
+    clustererByType.favorite = null //new window.kakao.maps.MarkerClusterer(clustererOptions)
+
+    window.kakao.maps.event.addListener(map, 'zoom_changed', () => {
+      const level = map.getLevel()
+
+      if (level <= 7) {
+        // marker.setMap(map) // 마커 보이기
+      } else {
+        // marker.setMap(null) // 마커 숨기기
+      }
+    })
   } catch (error) {
     console.error('지도 초기화 실패:', error)
   }
   // 현재 위치 기반 지역 설정
   await setLwdCdFilterToMapCenter()
-
-  // await loadFavoriteApt()
-})
-
-// 컴포넌트 언마운트 시 정리
-onUnmounted(() => {
-  document.removeEventListener('mousemove', onDrag)
-  document.removeEventListener('mouseup', stopDrag)
 })
 </script>
 
 <style scoped>
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
-
 .house-map {
   position: relative;
   display: flex;
   overflow: hidden;
   flex: 1;
-  height: 100vh;
+  /*height: 100vh;*/
   width: 100%;
   --sidebar-nav-width: 66px;
 }
 
-/* 첫 번째 사이드바: 네비게이션 아이콘 */
+/* 사이드바 네비게이션 */
 .house-map__sidebar-nav {
-  position: absolute;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  background: white;
+  border: 1px solid #d9d9d9;
   z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   user-select: none;
-  transition: box-shadow 0.2s ease;
-}
-
-.house-map__sidebar-nav:hover {
-  cursor: grab;
-}
-
-.house-map__sidebar-nav.dragging {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  cursor: grabbing !important;
+  width: var(--sidebar-nav-width);
 }
 
 .house-map__sidebar-nav-list {
   list-style: none;
   margin: 0;
-  padding: 8px;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
+.house-map__remote-control-item,
 .house-map__sidebar-nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
+  color: #3c3c3c;
   padding: 8px;
   cursor: pointer;
-  border-radius: 8px;
   transition: background-color 0.2s;
+  user-select: none;
 }
-
+.house-map__remote-control-item:hover,
 .house-map__sidebar-nav-item:hover {
   background-color: #f0f9ff;
+  color: #0475f4;
+}
+.house-map__remote-control-item:hover {
+  background-color: inherit;
+}
+.house-map__sidebar-nav-item.active {
+  background-color: #0475f4;
+  color: #ffffff;
 }
 
-.house-map__sidebar-nav-item span {
-  display: block;
+.house-map__remote-control-item,
+.house-map__sidebar-nav-item-label {
   font-size: 12px;
+  text-align: center;
   margin-top: 4px;
 }
 
-/* 사이드바 공통 스타일 */
-.sidebar {
+/* 리모컨 */
+.house-map__remote-control {
   position: absolute;
-  top: 0;
-  height: 100%;
-  background: #fff;
-  overflow-y: auto;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-  z-index: 900;
-  width: 350px;
-  padding: 16px;
-  transition: transform 0.3s ease;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  gap: 10px;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 8px 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
 }
 
-.search-sidebar {
-  left: 0;
+.house-map__remote-control-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+.house-map__remote-control-item.active {
+  color: #0475f4;
+}
+.house-map__remote-control-item.active:hover {
+  color: #0356b3;
+}
+
+/* 사이드바 */
+.house-map__sidebar {
+  display: flex;
+  flex-direction: column;
+
+  position: absolute;
+  z-index: 999;
+  overflow: hidden;
+
+  height: 100%;
+  width: 350px;
+  transition: transform 0.3s ease;
+
+  background: #fff;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.house-map__sidebar-left {
+  left: var(--sidebar-nav-width);
   transform: translateX(-100%);
 }
 
-.search-sidebar.active {
+.house-map__sidebar-left.active {
   transform: translateX(0);
 }
 
-.detail-sidebar {
+.house-map__sidebar-right {
+  overflow-y: auto;
   right: 0;
   transform: translateX(100%);
 }
 
-.detail-sidebar.active {
+.house-map__sidebar-right.active {
   transform: translateX(0);
 }
 
@@ -1110,14 +1124,12 @@ onUnmounted(() => {
   color: #111827;
 }
 
-/* 검색 박스 */
-.house-map__search {
+/* 검색 영역 */
+.house-map__search-container {
+  display: flex;
+  flex-direction: column;
   padding: 0 10px;
   border-bottom: 1px solid #3c3c3c;
-}
-
-.house-map__sidebar-search-box {
-  margin-bottom: 8px;
 }
 
 .house-map__search-input-wrapper {
@@ -1157,7 +1169,7 @@ onUnmounted(() => {
   margin: 8px 0;
 }
 
-.house-map__select_current_position_button {
+.house-map__set-map-center-button {
   margin: 0;
   padding: 2px;
   background: none;
@@ -1168,18 +1180,19 @@ onUnmounted(() => {
   transition: all 0.2s;
 }
 
-.house-map__select_current_position_button:hover {
+.house-map__set-map-center-button:hover {
   background-color: #e5e7eb;
 }
 
-.house-map__selete_current_position_button:disabled {
+.house-map__set-map-center-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.house-map__search-filter-wrapper {
+.house-map__search-lwdCd-wrapper {
   flex: 1;
   display: flex;
+  justify-content: center;
   align-items: center;
 }
 
@@ -1192,9 +1205,8 @@ onUnmounted(() => {
   cursor: pointer;
   text-align: center;
   font-size: 14px;
-  padding: 4px;
-  border-radius: 4px;
   transition: background-color 0.2s;
+  max-width: 100px;
 }
 
 .house-map__search-selectBox:hover {
@@ -1223,7 +1235,7 @@ onUnmounted(() => {
   flex: 1;
   overflow-y: scroll;
   min-width: 0;
-  padding: 0 10px;
+  box-sizing: border-box;
 }
 
 .house-map__apt-info {
@@ -1310,7 +1322,7 @@ onUnmounted(() => {
   font-size: 14px;
 }
 
-/* 맵 영역 */
+/* 지도 영역 */
 .house-map__map-container {
   flex: 1;
   background: #e5e7eb;
@@ -1340,53 +1352,6 @@ onUnmounted(() => {
 .no-deals {
   color: #6b7280;
   font-style: italic;
-}
-
-/* FontAwesome 아이콘 대체 */
-.fa-solid:before,
-.fas:before {
-  font-family: 'Font Awesome 6 Free';
-  font-weight: 900;
-}
-
-.fa-crosshairs:before {
-  content: '⊕';
-}
-.fa-search:before {
-  content: '🔍';
-}
-.fa-heart:before {
-  content: '♥';
-}
-.fa-robot:before {
-  content: '🤖';
-}
-.fa-ellipsis-h:before {
-  content: '⋯';
-}
-.fa-times:before {
-  content: '✕';
-}
-.fa-chevron-right:before {
-  content: '▶';
-}
-.fa-star:before {
-  content: '★';
-}
-.fa-spinner:before {
-  content: '⟳';
-}
-.fa-spin {
-  animation: fa-spin 2s infinite linear;
-}
-
-@keyframes fa-spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(359deg);
-  }
 }
 
 .price-chart-section {

@@ -3,7 +3,7 @@
     :visible="visible"
     @close="close"
     title="계정 삭제"
-    :icon="['fa-solid', 'fa-user-slash', 'fa-3x']"
+    :icon="['fas', 'fa-user-slash', 'fa-3x']"
     description="삭제한 계정은 복구할 수 없습니다.<br/>비밀번호를 입력해주세요."
   >
     <form @submit.prevent="submit" class="modal__form">

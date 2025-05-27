@@ -6,7 +6,7 @@
       <BaseInput
         id="email"
         v-model="email"
-        icon="fa-solid fa-envelope fa-2x"
+        icon="fas fa-envelope fa-2x"
         placeholder="가입 시 등록한 이메일을 입력하세요"
         autofocus
         :clearable="true"

@@ -3,7 +3,7 @@
     :visible="visible"
     @close="close"
     title="이메일"
-    :icon="['fa-solid', 'fa-envelope', 'fa-3x']"
+    :icon="['fas', 'fa-envelope', 'fa-3x']"
     description="이메일를 입력하세요."
   >
     <form @submit.prevent="submit" class="modal__form">

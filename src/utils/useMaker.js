@@ -62,6 +62,9 @@ export function useMarker() {
                 options.markerImage.options || {},
               ),
             }),
+            ...(options.zIndex && {
+              zIndex: options.zIndex,
+            }),
           })
           marker.item = item
           return marker
