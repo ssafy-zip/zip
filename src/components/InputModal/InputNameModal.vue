@@ -3,7 +3,7 @@
     :visible="visible"
     @close="close"
     title="이름"
-    :icon="['fa-solid', 'fa-user', 'fa-3x']"
+    :icon="['fas', 'fa-user', 'fa-3x']"
     description="이름을 입력하세요."
   >
     <form @submit.prevent="submit" class="modal__form">

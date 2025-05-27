@@ -138,8 +138,6 @@ function onProfileSaved(updated) {
 
 <style scoped src="@/assets/css/inputModal.css"></style>
 <style scoped>
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
-
 .myInfo__content-container {
   display: flex;
   flex-direction: column;

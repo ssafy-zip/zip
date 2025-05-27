@@ -44,7 +44,7 @@
 </template>
 
 <script setup>
-import { computed, getCurrentInstance, watch } from 'vue'
+import { computed, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
 
 defineOptions({ name: 'AppHeader' })
@@ -56,7 +56,7 @@ const { proxy } = getCurrentInstance()
 const isLoggedIn = computed(() => !!proxy.$auth?.token)
 
 // 로그인 직후에 savedUserId를 설정
-watch()
+// watch()
 
 // 로그아웃 처리
 function handleLogout() {

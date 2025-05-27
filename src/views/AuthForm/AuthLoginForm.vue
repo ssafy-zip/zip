@@ -6,7 +6,7 @@
       <BaseInput
         id="username"
         v-model="username"
-        icon="fa-solid fa-user fa-2x"
+        icon="fas fa-user fa-2x"
         placeholder="아이디"
         :clearable="true"
         autofocus
@@ -16,7 +16,7 @@
       <BaseInput
         id="password"
         v-model="password"
-        icon="fa-solid fa-lock fa-2x"
+        icon="fas fa-lock fa-2x"
         placeholder="비밀번호"
         :type="showPassword ? 'text' : 'password'"
       />
@@ -45,7 +45,7 @@
           <i class="fa-brands fa-google"></i> Google
         </button>
         <button type="button" class="social-button kakao">
-          <i class="fa-solid fa-comment"></i> Kakao
+          <i class="fas fa-comment"></i> Kakao
         </button>
         <button type="button" class="social-button naver">
           <i class="fa-brands fa-neos"></i> Naver

@@ -28,7 +28,6 @@ export function useLwdCd() {
 
     try {
       const { data } = await baseURL.get('/api/lwdCd/sido/simple')
-      console.log('시도 목록 : ', data)
       sidoList.value = data
     } catch (error) {
       console.error('시도 목록 조회 실패:', error)
@@ -43,7 +42,6 @@ export function useLwdCd() {
     if (!selectedSido.value) return
 
     try {
-      console.log(selectedSido.value)
       const { data } = await baseURL.get(`/api/lwdCd/sgg/${selectedSido.value}/simple`)
       sggList.value = data
     } catch (error) {

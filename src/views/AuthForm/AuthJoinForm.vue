@@ -7,7 +7,7 @@
       <BaseInput
         id="userId"
         v-model="form.userId"
-        icon="fa-solid fa-user fa-2x"
+        icon="fas fa-user fa-2x"
         placeholder="아이디"
         :clearable="true"
         autofocus
@@ -17,7 +17,7 @@
       <BaseInput
         id="password"
         v-model="form.password"
-        icon="fa-solid fa-lock fa-2x"
+        icon="fas fa-lock fa-2x"
         placeholder="비밀번호"
         type="password"
         :errorMessage="form.password && !validPassword ? ERROR_MESSAGES.INVALID_PASSWORD : ''"
@@ -28,7 +28,7 @@
       <BaseInput
         id="confirmPassword"
         v-model="form.confirmPassword"
-        icon="fa-solid fa-key fa-2x"
+        icon="fas fa-key fa-2x"
         placeholder="비밀번호 재입력"
         type="password"
         :errorMessage="
@@ -41,7 +41,7 @@
       <BaseInput
         id="name"
         v-model="form.name"
-        icon="fa-solid fa-id-card fa-2x"
+        icon="fas fa-id-card fa-2x"
         placeholder="이름"
         :clearable="true"
       />
@@ -50,7 +50,7 @@
       <BaseInput
         id="email"
         v-model="form.email"
-        icon="fa-solid fa-envelope fa-2x"
+        icon="fas fa-envelope fa-2x"
         placeholder="이메일"
         :clearable="true"
         :errorMessage="form.email && !validEmail ? ERROR_MESSAGES.INVALID_EMAIL : ''"
@@ -61,7 +61,7 @@
       <BaseInput
         id="phone"
         v-model="form.phone"
-        icon="fa-solid fa-phone fa-2x"
+        icon="fas fa-phone fa-2x"
         placeholder="전화번호"
         inputmode="numeric"
         :clearable="true"

@@ -7,7 +7,7 @@
         <BaseInput
           id="newPassword"
           v-model="newPassword"
-          icon="fa-solid fa-lock fa-2x"
+          icon="fas fa-lock fa-2x"
           placeholder="새 비밀번호"
           :type="showPassword ? 'text' : 'password'"
           :errorMessage="newPassword && !validPassword ? ERROR_MESSAGES.INVALID_PASSWORD : ''"
@@ -18,7 +18,7 @@
         <BaseInput
           id="confirmPassword"
           v-model="confirmPassword"
-          icon="fa-solid fa-lock fa-2x"
+          icon="fas fa-lock fa-2x"
           placeholder="비밀번호 확인"
           type="password"
           :errorMessage="confirmPassword && !passwordsMatch ? ERROR_MESSAGES.PASSWORD_MISMATCH : ''"

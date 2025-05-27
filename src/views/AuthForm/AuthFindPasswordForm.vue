@@ -6,7 +6,7 @@
       <BaseInput
         id="username"
         v-model="username"
-        icon="fa-solid fa-user fa-2x"
+        icon="fas fa-user fa-2x"
         placeholder="아이디"
         :clearable="true"
         autofocus
@@ -16,7 +16,7 @@
       <BaseInput
         id="email"
         v-model="email"
-        icon="fa-solid fa-envelope fa-2x"
+        icon="fas fa-envelope fa-2x"
         placeholder="이메일"
         :clearable="true"
         :errorMessage="email && !validEmail ? ERROR_MESSAGES.INVALID_EMAIL : ''"
