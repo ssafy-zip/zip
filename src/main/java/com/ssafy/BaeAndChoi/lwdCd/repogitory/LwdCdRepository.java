@@ -62,4 +62,11 @@ public interface LwdCdRepository extends Repository<LwdCd, String> {
             WHERE SUBSTRING(l.code, 1, 8) = :umdCode AND l.riName IS NOT NULL
             """)
     List<LwdCdSimpleResponseDTO> findRiByUmdCodeSimple(@Param("umdCode") String code);
+
+    @Query("""
+    SELECT DISTINCT SUBSTRING(l.code, 1, 5)
+    FROM LwdCd l
+    WHERE SUBSTRING(l.code, 3, 3) <> '000'
+""")
+    List<String> findUniqueDongCodes();
 }
