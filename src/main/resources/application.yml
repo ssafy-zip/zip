@@ -12,7 +12,7 @@ spring:
   data:
     mongodb:
       uri: >-
-        mongodb://rootuser:rootuser@yaguhang.kro.kr:27017/chat_log?authSource=admin
+        mongodb://ssafy:ssafy@yaguhang.kro.kr:27017/chat_log?authSource=chat_log
   servlet:
     multipart:
       max-file-size: 100MB
