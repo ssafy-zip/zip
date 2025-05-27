@@ -27,6 +27,14 @@
           <i class="fas fa-robot fa-2x"></i>
           <span class="house-map__sidebar-nav-item-label">AI 검색</span>
         </li>
+        <li
+          class="house-map__sidebar-nav-item"
+          :class="{ active: isSelectedRecommend }"
+          @click="toggleRecommendSidebar"
+        >
+          <i class="fas fa-magic fa-2x"></i>
+          <span class="house-map__sidebar-nav-item-label">AI 추천</span>
+        </li>
       </ul>
     </nav>
     <!-- 리모컨 -->
@@ -210,7 +218,40 @@
 
         <!-- 아파트 검색 결과 -->
         <section class="house-map__sidebar-thread">
-          <div class="house-map__sidebar-thread-container">
+          <!-- 사이드바 왼쪽 추천 탭 내용 -->
+          <div v-if="leftTap === 'recommend'" class="house-map__sidebar-thread-container">
+            <article v-if="isRecommendLoading" class="loading-indicator">
+              <span
+                >AI 추천 결과를 불러오는 중입니다... <i class="fas fa-spinner fa-spin fa-2x"></i
+              ></span>
+            </article>
+
+            <article v-else-if="recommendError" class="empty-state">
+              {{ recommendError }}
+            </article>
+
+            <article v-else-if="recommendResults.length === 0" class="empty-state">
+              <p>추천 결과가 없습니다. 다른 지역을 선택해보세요.</p>
+            </article>
+
+            <article
+              v-else
+              v-for="item in recommendResults"
+              :key="item.apartment.aptSeq"
+              class="house-map__apt-info"
+            >
+              <div class="house-map__apt-info-container" @click="selectApt(item.apartment)">
+                <div class="house-map__apt-info-title">{{ item.apartment.name }}</div>
+                <ul class="house-map__apt-info-detail">
+                  <li>{{ item.apartment.address }}</li>
+                  <li><strong>건축년도:</strong> {{ item.apartment.buildYear }}</li>
+                  <li><strong>도로명:</strong> {{ item.apartment.roadAddress }}</li>
+                </ul>
+                <div v-html="item.content" style="margin-top: 8px; color: #1d4ed8"></div>
+              </div>
+            </article>
+          </div>
+          <div v-else class="house-map__sidebar-thread-container">
             <article v-if="isListLoading" class="loading-indicator">
               <span> <i class="fas fa-spinner fa-spin fa-2x"></i></span>
             </article>
@@ -706,6 +747,47 @@ async function toggleFavoriteRegion() {
     }
   } catch (error) {
     console.error('관심지역 업데이트 실패:', error)
+  }
+}
+
+const isSelectedRecommend = computed(() => showLeftSidebar.value && leftTap.value === 'recommend')
+
+const recommendResults = ref([])
+const isRecommendLoading = ref(false)
+const recommendError = ref('')
+
+async function toggleRecommendSidebar() {
+  if (showLeftSidebar.value && leftTap.value === 'recommend') {
+    showLeftSidebar.value = false
+    leftTap.value = ''
+  } else {
+    showLeftSidebar.value = true
+    leftTap.value = 'recommend'
+    await fetchRecommendations()
+  }
+}
+
+async function fetchRecommendations() {
+  const code = selectedUmd.value || selectedSgg.value || ''
+  if (!code) {
+    recommendError.value = '지역을 먼저 선택해주세요.'
+    return
+  }
+
+  isRecommendLoading.value = true
+  recommendError.value = ''
+  recommendResults.value = []
+
+  try {
+    const { data } = await baseURL.get('/api/chat/recommend-apartment-lite', {
+      params: { code },
+    })
+    recommendResults.value = data.content
+  } catch (e) {
+    console.error(e)
+    recommendError.value = 'AI 추천 결과를 불러오는 데 실패했습니다.'
+  } finally {
+    isRecommendLoading.value = false
   }
 }
 
@@ -1534,5 +1616,11 @@ onMounted(async () => {
   font-style: italic;
   background: #f9fafb;
   border-radius: 8px;
+}
+
+.house-map__apt-info .ai-recommend-content {
+  color: #1d4ed8;
+  font-size: 13px;
+  margin-top: 8px;
 }
 </style>
