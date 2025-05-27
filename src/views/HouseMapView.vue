@@ -19,6 +19,14 @@
           <i class="fas fa-star fa-2x"></i>
           <span class="house-map__sidebar-nav-item-label">관심</span>
         </li>
+        <li
+          class="house-map__sidebar-nav-item"
+          :class="{ active: isSelectedChat }"
+          @click="toggleChatSidebar"
+        >
+          <i class="fas fa-robot fa-2x"></i>
+          <span class="house-map__sidebar-nav-item-label">AI 검색</span>
+        </li>
       </ul>
     </nav>
     <!-- 리모컨 -->
@@ -114,149 +122,162 @@
 
     <!--사이드바-->
     <aside class="house-map__sidebar house-map__sidebar-left" :class="{ active: showLeftSidebar }">
-      <!-- 검색 영역 -->
-      <section class="house-map__search-container">
-        <!--검색 상자-->
-        <article class="house-map__sidebar-search-box">
-          <label for="house-map__siderbar-search-keyword" class="house-map__search-input-wrapper">
-            <button class="house-map__search-button" @click="searchApt">
-              <i class="fas fa-search"></i>
-            </button>
-            <input
-              id="house-map__siderbar-search-keyword"
-              type="text"
-              placeholder="검색"
-              v-model="aptNm"
-              @keydown.enter="searchApt"
-              class="house-map__search-keyword"
-            />
-          </label>
-        </article>
+      <div v-if="leftTap === 'chat'" style="height: 100%">
+        <ChatBot />
+      </div>
+      <div v-else>
+        <!-- 검색 영역 -->
+        <section class="house-map__search-container">
+          <!--검색 상자-->
+          <article class="house-map__sidebar-search-box">
+            <label for="house-map__siderbar-search-keyword" class="house-map__search-input-wrapper">
+              <button class="house-map__search-button" @click="searchApt">
+                <i class="fas fa-search"></i>
+              </button>
+              <input
+                id="house-map__siderbar-search-keyword"
+                type="text"
+                placeholder="검색"
+                v-model="aptNm"
+                @keydown.enter="searchApt"
+                class="house-map__search-keyword"
+              />
+            </label>
+          </article>
 
-        <!-- 검색 필터 -->
-        <article class="house-map__search-filters">
-          <div class="house-map__search-filter-header">
-            <!-- 현위치로 법정동 지정 -->
-            <button
-              class="house-map__set-map-center-button"
-              @click="setLwdCdFilterToMapCenter"
-              :disabled="isMyLocationLoading"
-            >
-              <i class="fas fa-location-crosshairs" :class="{ 'fa-spin': isMyLocationLoading }"></i>
-            </button>
-            <!-- 법정동 필터 -->
-            <div class="house-map__search-lwdCd-wrapper">
-              <!-- 시/도 선택 -->
-              <select
-                class="house-map__search-selectBox"
-                v-model="selectedSido"
-                @change="onSidoChanged"
+          <!-- 검색 필터 -->
+          <article class="house-map__search-filters">
+            <div class="house-map__search-filter-header">
+              <!-- 현위치로 법정동 지정 -->
+              <button
+                class="house-map__set-map-center-button"
+                @click="setLwdCdFilterToMapCenter"
+                :disabled="isMyLocationLoading"
               >
-                <option value="">시/도</option>
-                <option v-for="sido in sidoList" :key="sido.code" :value="sido.code">
-                  {{ sido.name }}
-                </option>
-              </select>
-              <i class="fas fa-chevron-right"></i>
+                <i
+                  class="fas fa-location-crosshairs"
+                  :class="{ 'fa-spin': isMyLocationLoading }"
+                ></i>
+              </button>
+              <!-- 법정동 필터 -->
+              <div class="house-map__search-lwdCd-wrapper">
+                <!-- 시/도 선택 -->
+                <select
+                  class="house-map__search-selectBox"
+                  v-model="selectedSido"
+                  @change="onSidoChanged"
+                >
+                  <option value="">시/도</option>
+                  <option v-for="sido in sidoList" :key="sido.code" :value="sido.code">
+                    {{ sido.name }}
+                  </option>
+                </select>
+                <i class="fas fa-chevron-right"></i>
 
-              <!-- 시/군/구 선택 -->
-              <select
-                class="house-map__search-selectBox"
-                v-model="selectedSgg"
-                @change="onSggChanged"
-              >
-                <option value="">시/군/구</option>
-                <option v-for="sgg in sggList" :key="sgg.code" :value="sgg.code">
-                  {{ sgg.name }}
-                </option>
-              </select>
-              <i class="fas fa-chevron-right"></i>
+                <!-- 시/군/구 선택 -->
+                <select
+                  class="house-map__search-selectBox"
+                  v-model="selectedSgg"
+                  @change="onSggChanged"
+                >
+                  <option value="">시/군/구</option>
+                  <option v-for="sgg in sggList" :key="sgg.code" :value="sgg.code">
+                    {{ sgg.name }}
+                  </option>
+                </select>
+                <i class="fas fa-chevron-right"></i>
 
-              <!-- 읍/면/동 선택 -->
-              <select
-                class="house-map__search-selectBox"
-                v-model="selectedUmd"
-                @change="onUmdChanged"
-              >
-                <option value="">읍/면/동</option>
-                <option v-for="u in umdList" :key="u.code" :value="u.code">{{ u.name }}</option>
-              </select>
+                <!-- 읍/면/동 선택 -->
+                <select
+                  class="house-map__search-selectBox"
+                  v-model="selectedUmd"
+                  @change="onUmdChanged"
+                >
+                  <option value="">읍/면/동</option>
+                  <option v-for="u in umdList" :key="u.code" :value="u.code">{{ u.name }}</option>
+                </select>
+              </div>
+              <!-- 관심지역 토글 버튼 -->
+              <button class="house-map__favorite-button" @click="toggleFavoriteRegion">
+                <i
+                  class="fas fa-star house-map__favorite-button-icon"
+                  :class="{ starred: isStarred }"
+                ></i>
+              </button>
             </div>
-            <!-- 관심지역 토글 버튼 -->
-            <button class="house-map__favorite-button" @click="toggleFavoriteRegion">
-              <i
-                class="fas fa-star house-map__favorite-button-icon"
-                :class="{ starred: isStarred }"
-              ></i>
-            </button>
+          </article>
+        </section>
+
+        <!-- 아파트 검색 결과 -->
+        <section class="house-map__sidebar-thread">
+          <div class="house-map__sidebar-thread-container">
+            <article v-if="isListLoading" class="loading-indicator">
+              <span> <i class="fas fa-spinner fa-spin fa-2x"></i></span>
+            </article>
+            <article
+              v-else-if="isSelectedFavorite && favoriteApartments.length == 0"
+              class="empty-state"
+            >
+              <p
+                v-html="'관심 등록된 아파트가 없습니다.<br> 아파트 검색 후 관심 등록해보세요.'"
+              ></p>
+            </article>
+            <article
+              v-else-if="isSelectedSearch && searchApartments.length == 0"
+              class="empty-state"
+            >
+              <p v-html="'검색 결과가 없습니다.<br> 다른 지역이나 키워드로 검색해보세요.'"></p>
+            </article>
+            <article
+              v-else
+              class="house-map__apt-info"
+              v-for="item in leftTap === 'favorite' ? favoriteApartments : searchApartments"
+              :key="item.aptSeq"
+            >
+              <div
+                class="house-map__apt-info-container"
+                @click="selectApt(item)"
+                @mouseover="moveToLocaation(item.latitude, item.longitude)"
+              >
+                <div class="house-map__apt-info-title">{{ item.aptNm }}</div>
+                <ul class="house-map__apt-info-detail">
+                  <li v-if="item.deals && item.deals.length">
+                    <span>{{
+                      Math.min(...item.deals.map((d) => +d.dealAmount.replace(/,/g, '')))
+                    }}</span>
+                    -
+                    <span>{{
+                      Math.max(...item.deals.map((d) => +d.dealAmount.replace(/,/g, '')))
+                    }}</span>
+                    만원
+                  </li>
+                  <li v-if="item.deals && item.deals.length">
+                    <span>{{ Math.min(...item.deals.map((d) => +d.excluUseAr)) }}</span> -
+                    <span>{{ Math.max(...item.deals.map((d) => +d.excluUseAr)) }}</span> ㎡
+                  </li>
+                  <li>
+                    <div style="display: flex; justify-content: space-between">
+                      <span v-if="item.deals && item.deals.length">
+                        거래 이력 수: {{ item.deals.length }}
+                      </span>
+                      <span v-else class="no-deals">거래 이력 없음</span>
+                      <button
+                        class="house-map__favorite-button"
+                        @click.stop="toggleAptFavorite(item)"
+                      >
+                        <i
+                          class="fas fa-star house-map__favorite-button-icon"
+                          :class="{ starred: isAptFavorite(item.aptSeq) }"
+                        ></i>
+                      </button>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </article>
           </div>
-        </article>
-      </section>
-
-      <!-- 아파트 검색 결과 -->
-      <section class="house-map__sidebar-thread">
-        <div class="house-map__sidebar-thread-container">
-          <article v-if="isListLoading" class="loading-indicator">
-            <span> <i class="fas fa-spinner fa-spin fa-2x"></i></span>
-          </article>
-          <article
-            v-else-if="isSelectedFavorite && favoriteApartments.length == 0"
-            class="empty-state"
-          >
-            <p v-html="'관심 등록된 아파트가 없습니다.<br> 아파트 검색 후 관심 등록해보세요.'"></p>
-          </article>
-          <article v-else-if="isSelectedSearch && searchApartments.length == 0" class="empty-state">
-            <p v-html="'검색 결과가 없습니다.<br> 다른 지역이나 키워드로 검색해보세요.'"></p>
-          </article>
-          <article
-            v-else
-            class="house-map__apt-info"
-            v-for="item in leftTap === 'favorite' ? favoriteApartments : searchApartments"
-            :key="item.aptSeq"
-          >
-            <div
-              class="house-map__apt-info-container"
-              @click="selectApt(item)"
-              @mouseover="moveToLocaation(item.latitude, item.longitude)"
-            >
-              <div class="house-map__apt-info-title">{{ item.aptNm }}</div>
-              <ul class="house-map__apt-info-detail">
-                <li v-if="item.deals && item.deals.length">
-                  <span>{{
-                    Math.min(...item.deals.map((d) => +d.dealAmount.replace(/,/g, '')))
-                  }}</span>
-                  -
-                  <span>{{
-                    Math.max(...item.deals.map((d) => +d.dealAmount.replace(/,/g, '')))
-                  }}</span>
-                  만원
-                </li>
-                <li v-if="item.deals && item.deals.length">
-                  <span>{{ Math.min(...item.deals.map((d) => +d.excluUseAr)) }}</span> -
-                  <span>{{ Math.max(...item.deals.map((d) => +d.excluUseAr)) }}</span> ㎡
-                </li>
-                <li>
-                  <div style="display: flex; justify-content: space-between">
-                    <span v-if="item.deals && item.deals.length">
-                      거래 이력 수: {{ item.deals.length }}
-                    </span>
-                    <span v-else class="no-deals">거래 이력 없음</span>
-                    <button
-                      class="house-map__favorite-button"
-                      @click.stop="toggleAptFavorite(item)"
-                    >
-                      <i
-                        class="fas fa-star house-map__favorite-button-icon"
-                        :class="{ starred: isAptFavorite(item.aptSeq) }"
-                      ></i>
-                    </button>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </article>
-        </div>
-      </section>
+        </section>
+      </div>
     </aside>
 
     <!-- 세 번째 사이드바: 아파트 상세 정보 -->
@@ -325,6 +346,7 @@ import baseURL from '@/baseURL'
 import { useLwdCd } from '@/utils/useLwdCd'
 import { useKakaoMap } from '@/utils/useKakaoMap'
 import { useMarker } from '@/utils/useMaker.js'
+import ChatBot from '@/components/ChatBot.vue'
 
 const router = useRouter()
 
@@ -371,6 +393,7 @@ const leftTap = ref('') // 좌측 사이드바 탭 상태
 // 사이드바 상태
 const isSelectedSearch = computed(() => showLeftSidebar.value && leftTap.value === 'search')
 const isSelectedFavorite = computed(() => showLeftSidebar.value && leftTap.value === 'favorite')
+const isSelectedChat = computed(() => showLeftSidebar.value && leftTap.value === 'chat')
 
 // 검색어
 const aptNm = ref('')
@@ -487,6 +510,17 @@ async function toggleFavoriteSidebar() {
     loadFavoriteApartments()
   }
 }
+// 좌측 사이드바 채팅 탭 토글
+function toggleChatSidebar() {
+  if (showLeftSidebar.value && leftTap.value === 'chat') {
+    showLeftSidebar.value = false
+    leftTap.value = ''
+  } else {
+    showLeftSidebar.value = true
+    leftTap.value = 'chat'
+  }
+}
+
 // 우측 사이드바 열기
 function openRightSidebar() {
   showRightSidebar.value = true
@@ -1183,7 +1217,7 @@ onMounted(async () => {
   padding: 8px 12px;
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
+  z-index: 998;
 }
 
 /* 사이드바 */
