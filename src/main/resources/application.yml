@@ -12,7 +12,7 @@ spring:
   data:
     mongodb:
       uri: >-
-        mongodb://rootuser:rootuser@yaguhang.kro.kr:27017/chat_log?authSource=admin
+        mongodb://ssafy:ssafy@yaguhang.kro.kr:27017/chat_log?authSource=chat_log
   servlet:
     multipart:
       max-file-size: 100MB
@@ -22,9 +22,9 @@ spring:
       matching-strategy: ant_path_matcher
     static-path-pattern: /static/**
   datasource:
-    driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://yaguhang.kro.kr:3306/ssafy3?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
-    username: ssafy3
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/ssafyhome?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: ssafy
     password: ssafy
   jpa:
     properties:
