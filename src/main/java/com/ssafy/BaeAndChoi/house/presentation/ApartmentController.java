@@ -5,6 +5,7 @@ import com.ssafy.BaeAndChoi.house.domain.Apartment;
 import com.ssafy.BaeAndChoi.house.domain.ApartmentDeal;
 import com.ssafy.BaeAndChoi.house.domain.AptTradeBasicData;
 import com.ssafy.BaeAndChoi.house.domain.SearchOption;
+import com.ssafy.BaeAndChoi.lwdCd.application.LwdCdService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,14 +22,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ApartmentController {
     private final ApartmentService apartmentService;
-
+    private final LwdCdService lwdCdService;
     @GetMapping("/insertApartmentDeal")
     public ResponseEntity<String> insertHouseDealInfo(@RequestParam(required = false) String code) {
-        HashSet<String> dongCodes = apartmentService.requestDongCodes();
-        log.info("최종 수집된 동코드 : {}", dongCodes);
-        dongCodes.clear();
-        dongCodes.add(code != null ? code : "11110");
-        ArrayList<AptTradeBasicData> aptTradeBasicDataList = apartmentService.getRealEstateDealInfo(dongCodes);
+        List<String> dongCodes = lwdCdService.findUniqueDongCodes();
+        HashSet<String> codes = new HashSet<>();
+        codes.addAll(dongCodes);
+
+        ArrayList<AptTradeBasicData> aptTradeBasicDataList = apartmentService.getRealEstateDealInfo(codes);
         apartmentService.addApartmentDeal(aptTradeBasicDataList);
         return new ResponseEntity<>("success", HttpStatus.OK);
 //        return ResponseEntity.ok("총 " + dongCodes.size() + "개의 동코드를 가져왔습니다.");

@@ -30,7 +30,7 @@ public interface InterestHouseRepository extends JpaRepository<InterestHouse, In
          WHERE u.userId = :userId
            AND (:si     IS NULL OR substring(apt.sggCd,1,2) = :si)
            AND (:gun    IS NULL OR substring(apt.sggCd,3,3) = :gun)
-           AND (:gu     IS NULL OR apt.umdCd = :gu)
+           AND (:gu     IS NULL OR substring(apt.umdCd, 1, 3) = :gu)
            AND (
                  :aptName IS NULL
               OR  :aptName = ''

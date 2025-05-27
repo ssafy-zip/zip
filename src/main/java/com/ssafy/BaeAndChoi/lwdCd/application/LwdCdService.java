@@ -38,4 +38,8 @@ public class LwdCdService {
     }
     public List<LwdCdSimpleResponseDTO> findUmdBySggCodeSimple(String sggCode) { return lwdCdRepository.findUmdBySggCodeSimple(sggCode); }
     public List<LwdCdSimpleResponseDTO> findRiByUmdCodeSimple(String umdCode) { return lwdCdRepository.findRiByUmdCodeSimple(umdCode); }
+
+    public List<String> findUniqueDongCodes(){
+        return lwdCdRepository.findUniqueDongCodes();
+    }
 }
