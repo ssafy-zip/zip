@@ -58,6 +58,59 @@
         </li>
       </ul>
     </nav>
+    <!--버블-->
+    <nav class="house-map__cateogry-bubble">
+      <ul class="house-map__remote-control-list">
+        <li
+          class="house-map__remote-control-item"
+          :class="{ active: selectedCategory === 'HP8' }"
+          @click="searchCategory('HP8', '/markers/hospital.png')"
+        >
+          <img src="/markers/hospital.png" style="width: 20px" />
+          <span class="house-map__remote-control-item-label">병원</span>
+        </li>
+        <li
+          class="house-map__remote-control-item"
+          :class="{ active: selectedCategory === 'PM9' }"
+          @click="searchCategory('PM9', '/markers/pharmacy.png')"
+        >
+          <img src="/markers/pharmacy.png" style="width: 20px" />
+          <span class="house-map__remote-control-item-label">약국 </span>
+        </li>
+        <li
+          class="house-map__remote-control-item"
+          :class="{ active: selectedCategory === 'SW8' }"
+          @click="searchCategory('SW8', '/markers/subway.png')"
+        >
+          <img src="/markers/subway.png" style="width: 20px" />
+          <span class="house-map__remote-control-item-label">지하철</span>
+        </li>
+        <li
+          class="house-map__remote-control-item"
+          :class="{ active: selectedCategory === 'MT1' }"
+          @click="searchCategory('MT1', '/markers/market.png')"
+        >
+          <img src="/markers/market.png" style="width: 20px" />
+          <span class="house-map__remote-control-item-label">마트</span>
+        </li>
+        <li
+          class="house-map__remote-control-item"
+          :class="{ active: selectedCategory === 'SC4' }"
+          @click="searchCategory('SC4', '/markers/school.png')"
+        >
+          <img src="/markers/school.png" style="width: 20px" />
+          <span class="house-map__remote-control-item-label">학교</span>
+        </li>
+        <li
+          class="house-map__remote-control-item"
+          :class="{ active: selectedCategory === 'BK9' }"
+          @click="searchCategory('BK9', '/markers/bank.png')"
+        >
+          <img src="/markers/bank.png" style="width: 20px" />
+          <span class="house-map__remote-control-item-label">은행</span>
+        </li>
+      </ul>
+    </nav>
 
     <!--사이드바-->
     <aside class="house-map__sidebar house-map__sidebar-left" :class="{ active: showLeftSidebar }">
@@ -303,6 +356,7 @@ const { markersByType, markersVisibleByType, clustererByType, toggleMarkers, cre
 // Map 관련 상태
 const mapContainer = ref(null)
 let map = null
+let ps = null
 
 // 로딩 관련 상태
 const isMapLoaded = ref(false) // 지도
@@ -349,6 +403,66 @@ watch(
   },
   { deep: true },
 )
+
+/* 주변 장소 탐색 */
+// 카테고리 상태 및 마커 리스트
+const selectedCategory = ref('')
+const categoryMarkers = ref([])
+
+// 카테고리 검색 토글 함수
+const searchCategory = (categoryCode, imgSrc) => {
+  if (!map || !ps) return
+
+  // 동일 카테고리 선택 시 → 마커 제거 & 해제
+  if (selectedCategory.value === categoryCode) {
+    categoryMarkers.value.forEach((marker) => marker.setMap(null))
+    categoryMarkers.value = []
+    selectedCategory.value = ''
+    return
+  }
+
+  // 새로운 카테고리 → 기존 마커 제거 후 검색
+  selectedCategory.value = categoryCode
+  categoryMarkers.value.forEach((marker) => marker.setMap(null))
+  categoryMarkers.value = []
+
+  ps.categorySearch(
+    categoryCode,
+    (data, status) => {
+      if (status === window.kakao.maps.services.Status.OK) {
+        data.forEach((place) => {
+          const markerImage = new window.kakao.maps.MarkerImage(
+            imgSrc,
+            new window.kakao.maps.Size(32, 32), // 마커 크기
+            { offset: new window.kakao.maps.Point(16, 32) },
+          )
+
+          const marker = new window.kakao.maps.Marker({
+            map: map,
+            position: new window.kakao.maps.LatLng(place.y, place.x),
+            title: place.place_name,
+            image: markerImage,
+          })
+
+          // 마커 클릭 시 infoWindow or overlay
+          const infowindow = new window.kakao.maps.InfoWindow({
+            content: `<div style='padding:6px;font-size:14px;'>${place.place_name}</div>`,
+          })
+
+          window.kakao.maps.event.addListener(marker, 'click', () => {
+            infowindow.open(map, marker)
+          })
+
+          categoryMarkers.value.push(marker)
+        })
+      }
+    },
+    {
+      location: map.getCenter(),
+      radius: 1000,
+    },
+  )
+}
 
 /* 사이드바 제어 */
 // 좌측 사이드바 검색 탭 토글
@@ -438,7 +552,7 @@ async function searchApt() {
   } finally {
     isListLoading.value = false
   }
-  await loadFavoriteApartments()
+  if (localStorage.getItem('authToken')) await loadFavoriteApartments()
 }
 // 지역으로 검색
 async function searchAptByLwdCd() {
@@ -955,15 +1069,7 @@ onMounted(async () => {
     clustererByType.search = new window.kakao.maps.MarkerClusterer(clustererOptions)
     clustererByType.favorite = null //new window.kakao.maps.MarkerClusterer(clustererOptions)
 
-    window.kakao.maps.event.addListener(map, 'zoom_changed', () => {
-      const level = map.getLevel()
-
-      if (level <= 7) {
-        // marker.setMap(map) // 마커 보이기
-      } else {
-        // marker.setMap(null) // 마커 숨기기
-      }
-    })
+    ps = new window.kakao.maps.services.Places()
   } catch (error) {
     console.error('지도 초기화 실패:', error)
   }
@@ -998,6 +1104,12 @@ onMounted(async () => {
   padding: 0;
   display: flex;
   flex-direction: column;
+}
+.house-map__remote-control-item img {
+  opacity: 60%;
+}
+.house-map__remote-control-item.active img {
+  opacity: 100%;
 }
 
 .house-map__remote-control-item,
@@ -1057,6 +1169,21 @@ onMounted(async () => {
 }
 .house-map__remote-control-item.active:hover {
   color: #0356b3;
+}
+
+/* 카테고리 버블 */
+.house-map__cateogry-bubble {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  gap: 10px;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 8px 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
 }
 
 /* 사이드바 */
