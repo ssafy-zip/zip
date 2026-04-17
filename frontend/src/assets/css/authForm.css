@@ -1,0 +1,180 @@
+/* 컨테이너 */
+.form-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 20px;
+}
+
+/* 폼 박스 */
+.form-box {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 40px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* 인풋 그룹 */
+.input-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 8px;
+}
+
+.input-label {
+  width: 40px;
+  font-weight: bold;
+  color: #374151;
+  text-align: center;
+}
+
+.input-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding-right: 10px;
+}
+
+.input-box input {
+  flex: 1;
+  padding: 10px;
+  font-size: 14px;
+  border: none;
+  background: none;
+  outline: none;
+}
+
+/* 인풋 내부 버튼 */
+.input-action-button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #6b7280;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.input-action-button:hover {
+  color: #111827;
+}
+
+.input-valid {
+  padding-right: 4px;
+  color: #22c55e;
+}
+
+/* 체크박스 옵션 */
+.form-options {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #374151;
+}
+
+.form-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.form-option input[type='checkbox'] {
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+/* 제출 버튼 */
+.form-submit-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #2563eb;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.form-submit-button:hover {
+  background-color: #1d4ed8;
+}
+
+.form-submit-button:disabled {
+  background-color: #a5b4fc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* 링크 모음 */
+.link-group {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.link-group a {
+  color: #2563eb;
+  text-decoration: none;
+  margin: 0 4px;
+}
+
+.link-group a:hover {
+  text-decoration: underline;
+}
+
+.link-group a:not(:last-child)::after {
+  content: '|';
+  padding-left: 5px;
+  color: #6b7280;
+}
+
+/* 구분선 */
+.form-separator {
+  border: none;
+  height: 1px;
+  background-color: #e5e7eb;
+  margin: 24px 0;
+}
+
+/* 에러 메시지 */
+.form-error {
+  color: #e53e3e;
+  font-size: 0.875rem;
+  margin-bottom: 12px;
+}
+
+.form-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #111827;
+  text-align: center;
+}
+
+/* 결과 메시지 스타일 */
+.form-message {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 14px;
+}
+.form-message.success {
+  background-color: #ecfdf5;
+  color: #065f46;
+}
+.form-message.error {
+  background-color: #fce7e7;
+  color: #991b1b;
+}
